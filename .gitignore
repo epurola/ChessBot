@@ -25,7 +25,6 @@ Makefile
 *.swo
 
 
-resources/
 
 
 .DS_Store
