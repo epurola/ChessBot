@@ -972,6 +972,7 @@ uint64_t Board::generateKnightMoves(int square, char piece)
     {
         moves &= pinMasks[square];
     }
+    
     if (checkers)
         moves &= checkMask;
 
@@ -1179,12 +1180,14 @@ int Board::getAllLegalMovesAsArray(std::pair<int, int> movesList[], bool maximiz
 
     uint64_t AllPieces = maximizingPlayer ? getWhitePieces() : getBlackPieces();
     
+    // Iterate over all pieces
     while (AllPieces)
     {
         int fromSquare = bitScanForward(AllPieces);
         char piece = getPieceAtSquare(fromSquare);
         uint64_t moves = 0;
 
+        // Generate moves for each piece type
         switch (std::tolower(piece))
         {
         case 'p':
@@ -1207,26 +1210,28 @@ int Board::getAllLegalMovesAsArray(std::pair<int, int> movesList[], bool maximiz
             break;
         }
 
+        // Process all the generated moves
         while (moves)
         {
             int toSquare = bitScanForward(moves);
-
             if (getPieceAtSquare(toSquare) != ' ') 
-                captureMoves[captureCount++] = {fromSquare, toSquare};
+                captureMoves[captureCount++] = {fromSquare, toSquare};  // It's a capture
             else
-                nonCaptureMoves[moveCount++] = {fromSquare, toSquare};
+                nonCaptureMoves[moveCount++] = {fromSquare, toSquare};  // It's a non-capture
 
-            moves &= moves - 1;
+            moves &= moves - 1; // Clears the least significant bit (processed move)
         }
 
-        AllPieces &= AllPieces - 1;
+        AllPieces &= AllPieces - 1;  // Clears the least significant bit (processed piece)
     }
 
-    auto prioritizeMove = [&](std::pair<int, int> move)
+    // Prioritize certain moves, especially those related to check or forced moves
+    auto prioritizeMove = [&](std::pair<int, int> move) -> bool
     {
         int fromSquare = move.first;
         char piece = getPieceAtSquare(fromSquare);
 
+        // Prioritize knight moves that are attacking near the edges of the board
         if (piece == 'n' || piece == 'N')
         {
             if ((maximizingPlayer && (fromSquare == 1 || fromSquare == 6)) ||
@@ -1236,23 +1241,28 @@ int Board::getAllLegalMovesAsArray(std::pair<int, int> movesList[], bool maximiz
             }
         }
 
+        // Prioritize king castling moves
         if (piece == 'k' || piece == 'K')
         {
-            if (fromSquare - move.second == 2 || fromSquare - move.second == -2)
+            if (fromSquare - move.second == 2 || fromSquare - move.second == -2)  // Castling move
             {
                 return true; 
             }
         }
 
-        return false; 
+        return false;  // Default case: no special prioritization
+   
     };
 
+    // First, add capture moves (prioritize them as they change the board state)
     for (int i = 0; i < captureCount; i++)
     {
         movesList[i] = captureMoves[i];
     }
 
     int nonCaptureIndex = captureCount;
+
+    // Process non-capture moves, prioritizing based on their "importance"
     for (int i = 0; i < moveCount; i++)
     {
         if (prioritizeMove(nonCaptureMoves[i]))
@@ -1260,16 +1270,19 @@ int Board::getAllLegalMovesAsArray(std::pair<int, int> movesList[], bool maximiz
             movesList[nonCaptureIndex++] = nonCaptureMoves[i];
         }
     }
+
+    // Add remaining non-capture moves that were not prioritized
     for (int i = 0; i < moveCount; i++)
     {
         if (!prioritizeMove(nonCaptureMoves[i]))
         {
-            movesList[nonCaptureIndex++] = nonCaptureMoves[i]; 
+            movesList[nonCaptureIndex++] = nonCaptureMoves[i];
         }
     }
 
-    return captureCount + moveCount; 
+    return captureCount + moveCount;  // Return the total number of moves
 }
+
 
 std::string Board::moveToString(int fromSquare, int toSquare)
 {

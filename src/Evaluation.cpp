@@ -9,8 +9,8 @@ static const int Pawns[64] = {
     50, 50, 50, 50, 50, 50, 50, 50,
     10, 10, 20, 30, 30, 20, 10, 10,
     5, 5, 10, 25, 25, 10, 5, 5,
-    0, 0, 0, 20, 20, 0, 0, 0,
-    5, -5, -10, 0, 0, -10, -5, 5,
+    0, -5, -5, 20, 20, -5, -5, 0,
+    5, -10, -10, 0, 0, -10, -10, 5,
     5, 10, 10, -30, -30, 10, 10, 5,
     0, 0, 0, 0, 0, 0, 0, 0};
 
@@ -85,7 +85,11 @@ int Evaluation::evaluatePosition()
 
     int rooks = rookOnOpenFile();
 
-    return materialScore + positionalScore + pawns + rooks;
+   // int castlingPawns = evaluateCastlingPawns();
+
+   // int rookInLineWithKing = evaluateRookInLineWithKing();
+
+    return materialScore + positionalScore + pawns + rooks ;
 }
 
 // Evaluates material balance
@@ -145,6 +149,122 @@ int Evaluation::evaluatePassedPawns()
 
     return score;
 }
+
+int Evaluation::evaluateCastlingPawns()
+{
+    int score = 0;
+    bool isEndgame = board->whitePawns.count() + board->blackPawns.count() 
+    + board->whiteBishops.count() + board->blackBishops.count() 
+    + board->whiteKnights.count() + board->blackKnights.count() + board->whiteQueens.count() 
+    + board->blackQueens.count() + board->whiteRooks.count() + board->blackRooks.count() < 15;
+
+    if(board->whiteKing.bitboard & (1ULL << 62) && !isEndgame)
+    {
+        if(board->whitePawns.bitboard & (1ULL << 55))
+        {
+            score += 20;
+        }
+        if(board->whitePawns.bitboard & (1ULL << 54))
+        {
+            score += 50;
+        }
+       
+        if(board->whitePawns.bitboard & (1ULL << 53))
+        {
+            score += 50;
+        }
+        
+    }
+    if(board->whiteKing.bitboard & (1ULL << 58) && !isEndgame)
+    {
+        if(board->whitePawns.bitboard & (1ULL << 50))
+        {
+            score += 50;
+        }
+      
+        if(board->whitePawns.bitboard & (1ULL << 49))
+        {
+            score += 50;
+        }
+      
+        if(board->whitePawns.bitboard & (1ULL << 48))
+        {
+            score += 15;
+        }
+       
+        
+    }
+    if(board->blackKing.bitboard & (1ULL << 2) && !isEndgame)
+    {
+
+        if(board->blackPawns.bitboard & (1ULL << 8))
+        {
+            score -= 15;
+        }
+        if(board->blackPawns.bitboard & (1ULL << 9))
+        {
+            score -= 50;
+        }
+        if(board->blackPawns.bitboard & (1ULL << 10))
+        {
+            score -= 50;
+        }
+        
+    }
+    if(board->blackKing.bitboard & (1ULL << 6) && !isEndgame)
+    {
+        if(board->blackPawns.bitboard & (1ULL << 13))
+        {
+            score -= 50;
+        }
+        if(board->blackPawns.bitboard & (1ULL << 14))
+        {
+            score -= 50;
+        }
+        if(board->blackPawns.bitboard & (1ULL << 15))
+        {
+            score -= 15;
+        }
+    }
+    
+    return score;
+}
+
+int Evaluation::evaluateRookInLineWithKing()
+{
+    int score = 0;
+
+    uint64_t whiteRooks = board->whiteRooks.bitboard;
+    uint64_t whiteKing = board->whiteKing.bitboard;
+
+    while (whiteRooks) {
+        int rookSquare = bitScanForward(whiteRooks);  
+        uint64_t rookMask = board->attackTable.rookMask[rookSquare];
+        if (rookMask & board->blackKing.bitboard) {
+            score += 50;  
+        }
+
+        whiteRooks &= whiteRooks - 1;  
+    }
+
+
+    uint64_t blackRooks = board->blackRooks.bitboard;
+    uint64_t blackKing = board->blackKing.bitboard;
+
+    while (blackRooks) {
+        int rookSquare = bitScanForward(blackRooks);  
+        uint64_t rookMask = board->attackTable.rookMask[rookSquare];
+
+        if (rookMask & whiteKing) {
+            score -= 50;  
+        }
+
+        blackRooks &= blackRooks - 1;  
+    }
+
+    return score;
+}
+
 
 // Helper function to determine if a pawn is a passed pawn
 bool Evaluation::isPassedPawn(int square, bool isWhite)

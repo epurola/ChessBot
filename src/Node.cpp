@@ -65,6 +65,9 @@ std::pair<int, std::pair<int, int>> Node::minimax(std::shared_ptr<Board> board, 
     //     return result; // Use cached evaluation
     //   }
 
+    // Check if the king is in check
+    
+
     constexpr int MAX_MOVES = 256;
     std::pair<int, int> moves[MAX_MOVES];
     int moveCount = board->getAllLegalMovesAsArray(moves, maximizingPlayer);

@@ -26,6 +26,8 @@ private:
     int evaluatePassedPawns();
     int rookOnOpenFile();
     uint64_t getFileMask(int file);
+    int evaluateCastlingPawns();
+    int evaluateRookInLineWithKing();
 
     // Positional evaluation
     int evaluatePieceSquareTables();
