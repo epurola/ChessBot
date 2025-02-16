@@ -27,6 +27,7 @@ public:
     bool gameOver = false;
     int hits = 0;
     std::vector<std::pair<int, int>> previousBestMoves;
+    std::unordered_map<int, std::pair<int, int>> killerMoves; 
 
 private:
     void printMoves(const std::vector<std::string> &moves);

@@ -6,13 +6,14 @@
 
 std::pair<int, std::pair<int, int>> Node::iterativeDeepening(std::shared_ptr<Board> board, int maxDepth, bool maximizingPlayer, Evaluation &evaluate)
 {
-    std::pair<int, int> bestMove = {-5, -1}; 
+    std::pair<int, int> bestMove = {-5, -1};
     int bestEval = maximizingPlayer ? std::numeric_limits<int>::min() : std::numeric_limits<int>::max();
+    
 
     for (int depth = 1; depth <= maxDepth; depth++)
     {
         gameOver = false;
-        nodesExplored = 0; 
+        nodesExplored = 0;
         std::pair<int, std::pair<int, int>> result = minimax(board, depth, maximizingPlayer, std::numeric_limits<int>::min(), std::numeric_limits<int>::max(), evaluate);
         bestEval = result.first;
         bestMove = result.second;
@@ -39,9 +40,48 @@ std::pair<int, std::pair<int, int>> Node::minimax(std::shared_ptr<Board> board, 
         int eval = evaluate.evaluatePosition();
         return {eval, {-4, -1}};
     }
-
+/*
     // checks if opponent lost
-    if (board->gameOver(maximizingPlayer))
+     board->computeZobristHash();
+    uint64_t positionHash = board->getZobristHash();
+
+
+    TranspositionEntry entry;  // Declare a TranspositionEntry to store the probe result
+
+    // Probe the transposition table
+    if (board->probeTranspositionTable(positionHash, depth, alpha, beta, entry))
+    {
+        int transpositionEval = entry.evaluation;
+        int transpositionFrom = entry.bestFrom;
+        int transpositionTo = entry.bestTo;
+    
+    
+        if (depth <= entry.depth)
+        {
+            if (entry.flag == EXACT)
+            {
+               
+                return {entry.evaluation, {entry.bestFrom, entry.bestTo}};
+            }
+            else if (entry.flag == LOWER_BOUND && transpositionEval > alpha)
+            {
+             
+                return {entry.evaluation, {entry.bestFrom, entry.bestTo}};
+            }
+            else if (entry.flag == UPPER_BOUND && transpositionEval < beta)
+            {
+          
+                return {entry.evaluation, {entry.bestFrom, entry.bestTo}};
+            }
+        }
+    }
+    */
+
+    constexpr int MAX_MOVES = 256;
+    std::pair<int, int> moves[MAX_MOVES];
+    int moveCount = board->getAllLegalMovesAsArray(moves, maximizingPlayer);
+
+    if (moveCount == 0)
     {
         gameOver = true;
         nodesExplored++;
@@ -57,21 +97,6 @@ std::pair<int, std::pair<int, int>> Node::minimax(std::shared_ptr<Board> board, 
         }
     }
 
-    // uint64_t positionHash = board->getZobristHash();
-    // std::pair<int, std::pair<int, int>> result;
-
-    //  if (board->probeTranspositionTable(positionHash, depth, alpha, beta, result))
-    //  {
-    //     return result; // Use cached evaluation
-    //   }
-
-    // Check if the king is in check
-    
-
-    constexpr int MAX_MOVES = 256;
-    std::pair<int, int> moves[MAX_MOVES];
-    int moveCount = board->getAllLegalMovesAsArray(moves, maximizingPlayer);
-
     // Prioritize the previous best move by moving it to the front
     for (size_t i = 0; i < previousBestMoves.size(); i++)
     {
@@ -84,8 +109,21 @@ std::pair<int, std::pair<int, int>> Node::minimax(std::shared_ptr<Board> board, 
         }
     }
 
+    if (killerMoves.find(depth) != killerMoves.end())
+    {
+        std::pair<int, int> killerMove = killerMoves[depth];
+        for (int i = 0; i < moveCount; i++)
+        {
+            if (moves[i] == killerMove)
+            {
+                std::swap(moves[0], moves[i]);
+                break;
+            }
+        }
+    }
+
     int bestScore = maximizingPlayer ? std::numeric_limits<int>::min() : std::numeric_limits<int>::max();
-    std::pair<int, int> bestMove = {moves[0].first, moves[0].second};
+    std::pair<int, int> bestMove = {moves[1].first, moves[1].second};
 
     for (int i = 0; i < moveCount; i++)
     {
@@ -94,7 +132,6 @@ std::pair<int, std::pair<int, int>> Node::minimax(std::shared_ptr<Board> board, 
         int moveTo = moves[i].second;
 
         board->movePiece(moveFrom, moveTo);
-        // board->computeZobristHash();
         Move lastMove = board->getLastMove();
 
         //  Recurse
@@ -104,7 +141,9 @@ std::pair<int, std::pair<int, int>> Node::minimax(std::shared_ptr<Board> board, 
 
         //  Undo Move
         board->undoMove(lastMove.from, lastMove.to, lastMove.capturedPiece, lastMove.enpSquare, lastMove.wasEnPassant,
-                        lastMove.enPassantCapturedSquare, lastMove.enPassantCapturedPiece, lastMove.wasPromotion, lastMove.originalPawn);
+                        lastMove.enPassantCapturedSquare, 
+                        lastMove.enPassantCapturedPiece, lastMove.wasPromotion, 
+                        lastMove.originalPawn);
 
         if (maximizingPlayer)
         {
@@ -142,9 +181,23 @@ std::pair<int, std::pair<int, int>> Node::minimax(std::shared_ptr<Board> board, 
             }
         }
     }
+    if (bestMove.first != -1 && bestMove.second != -1)
+    {
+        killerMoves[depth] = bestMove;
+    }
+/*
+    TranspositionFlag flag = EXACT; // Assume we have an exact value
+    if (bestScore <= alpha)
+    {
+        flag = UPPER_BOUND;
+    }
+    else if (bestScore >= beta)
+    {
+        flag = LOWER_BOUND;
+    }
 
-    // board->storeTransposition(positionHash, depth, bestScore, alpha, beta, bestMove.first, bestMove.second);
-
+    board->storeTransposition(positionHash, depth, bestScore, alpha, beta, bestMove.first, bestMove.second, flag);
+*/
     return {bestScore, bestMove};
 }
 

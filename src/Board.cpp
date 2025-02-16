@@ -637,7 +637,7 @@ bool Board::isValidMove(int from, int to)
 uint64_t Board::findCheckers(int squareOfKing, char king, uint64_t &checkMask)
 {
     uint64_t checkers = 0;
-    checkMask = 0;
+   
     int color = std::islower(king) ? 1 : 0;
 
     uint64_t opponentPawns = color ? whitePawns.bitboard : blackPawns.bitboard;
@@ -647,29 +647,29 @@ uint64_t Board::findCheckers(int squareOfKing, char king, uint64_t &checkMask)
     // uint64_t opponentKing = color ? whiteKing.bitboard : blackKing.bitboard;
 
     uint64_t attackingPawns = opponentPawns;
+    while (attackingPawns)
+{
+    int pawnSquare = bitScanForward(attackingPawns);
+    char piece = getPieceAtSquare(pawnSquare);
+    int colorPawn = std::islower(piece) ? 0 : 1;
+
+    uint64_t pawnAttacks = generatePawnMovesForKing(pawnSquare, piece);
+    
+    if (pawnAttacks & (1ULL << squareOfKing))
     {
-        int pawnSquare = bitScanForward(attackingPawns);
-        char piece = getPieceAtSquare(pawnSquare);
-        int colorPawn = std::islower(piece) ? 0 : 1;
+        checkers |= (1ULL << pawnSquare);
 
-        uint64_t pawnAttacks = colorPawn
-                                   ? (((1ULL << pawnSquare) >> 7) & ~0x0101010101010101ULL) | (((1ULL << pawnSquare) >> 9) & ~0x8080808080808080ULL)  // White pawn attacks
-                                   : (((1ULL << pawnSquare) << 7) & ~0x8080808080808080ULL) | (((1ULL << pawnSquare) << 9) & ~0x0101010101010101ULL); // Black pawn attacks
-
-        if (pawnAttacks & (1ULL << squareOfKing))
+        if (enPassantTarget > 0)
         {
-            checkers |= (1ULL << pawnSquare);
-
-            if (enPassantTarget > 0)
-            {
-                int offset = (colorPawn == 0) ? -8 : 8;
-                checkers |= (1ULL << (pawnSquare + offset));
-                checkers &= ~(1ULL << pawnSquare);
-            }
+            int offset = (colorPawn == 0) ? -8 : 8;
+            checkers |= (1ULL << (pawnSquare + offset));
+            checkers &= ~(1ULL << pawnSquare);
         }
-
-        attackingPawns &= attackingPawns - 1;
     }
+
+    attackingPawns &= attackingPawns - 1; // Remove the current pawn and continue
+}
+
 
     uint64_t knights = opponentKnights;
     while (knights)

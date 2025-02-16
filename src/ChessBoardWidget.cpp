@@ -40,7 +40,7 @@ void ChessBoardWidget::toggleAIMove()
     Node root;
     Evaluation evaluate(board);
     auto start = std::chrono::high_resolution_clock::now();
-    auto [bestScore, bestmove] = root.iterativeDeepening(board, 7, isWhite, evaluate);
+    auto [bestScore, bestmove] = root.iterativeDeepening(board, 6, isWhite, evaluate);
     auto end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> duration = end - start;
 
@@ -62,7 +62,8 @@ void ChessBoardWidget::undoMove()
     Move lastMove = board->getLastMove();
 
     board->undoMove(lastMove.from, lastMove.to, lastMove.capturedPiece, lastMove.enpSquare, lastMove.wasEnPassant,
-                    lastMove.enPassantCapturedSquare, lastMove.enPassantCapturedPiece, lastMove.wasPromotion, lastMove.originalPawn);
+                    lastMove.enPassantCapturedSquare, lastMove.enPassantCapturedPiece, 
+                    lastMove.wasPromotion, lastMove.originalPawn);
 
     update();
 }

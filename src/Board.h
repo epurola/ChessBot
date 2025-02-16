@@ -168,9 +168,6 @@ public:
     bool isDraw(bool maximizingPlayer);
     bool isKingInCheck(bool maximizingPlayer);
 
-
-    uint64_t checkers;
-    uint64_t checkMask;
 };
 
 #endif // BOARD_H
