@@ -9,6 +9,5 @@ int main(int argc, char *argv[]) {
     ChessBoardWidget *widget = new ChessBoardWidget(board);
     widget->show();
 
-
     return app.exec();
 }

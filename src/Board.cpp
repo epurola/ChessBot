@@ -24,6 +24,46 @@ Board::Board()
     zobristHash = computeZobristHash();
     initTranspositionTable();
 }
+Board::Board(const std::shared_ptr<Board>& other1)
+{
+    const Board& other = *other1;
+    // Copy basic properties
+    this->whitePawns = other.whitePawns;
+    this->blackPawns = other.blackPawns;
+    this->whiteKnights = other.whiteKnights;
+    this->blackKnights = other.blackKnights;
+    this->whiteBishops = other.whiteBishops;
+    this->blackBishops = other.blackBishops;
+    this->whiteRooks = other.whiteRooks;
+    this->blackRooks = other.blackRooks;
+    this->whiteQueens = other.whiteQueens;
+    this->blackQueens = other.blackQueens;
+    this->whiteKing = other.whiteKing;
+    this->blackKing = other.blackKing;
+    this->enPassantTarget = other.enPassantTarget;
+    this->lastMoveEnPassant = other.lastMoveEnPassant;
+    this->enpassantCapturedSquare = other.enpassantCapturedSquare;
+    this->enpassantCapturedPiece = other.enpassantCapturedPiece;
+    this->blackCanCastleQ = other.blackCanCastleQ;
+    this->blackCanCastleK = other.blackCanCastleK;
+    this->WhiteCanCastleQ = other.WhiteCanCastleQ;
+    this->WhiteCanCastleK = other.WhiteCanCastleK;
+    this->whiteToMove = other.whiteToMove;
+    this->zobristHash = other.zobristHash;
+
+    // Copy any dynamic data structures like move history and transposition table
+    this->moveHistory = other.moveHistory;
+    this->transpositionTable = other.transpositionTable;
+    std::copy(std::begin(other.kingMovesTable), std::end(other.kingMovesTable), std::begin(this->kingMovesTable));
+    std::copy(std::begin(other.pinMasks), std::end(other.pinMasks), std::begin(this->pinMasks));
+
+    // Initialize any other members (like AttackTable) if necessary
+    this->attackTable.initialize();
+    
+    // Reinitialize Zobrist if required, since we have just copied the data
+    this->initializeZobrist();
+}
+
 
 void Board::initializeZobrist()
 {
@@ -712,11 +752,16 @@ uint64_t Board::findCheckers(int squareOfKing, char king, uint64_t &checkMask)
         bishops &= bishops - 1;
     }
 
-    unsigned long index;
-    if (_BitScanForward64(&index, checkers))
+    unsigned __int64 numCheckers = __popcnt64(checkers); // Count the number of checkers
+    if (numCheckers == 1)
     {
         int checkerSquare = bitScanForward(checkers);
         checkMask = attackTable.betweenTable[squareOfKing][checkerSquare] | (1ULL << checkerSquare);
+    }
+    else if (numCheckers >= 2)
+    {
+        // Double check: The king must move, so checkMask should be 0 
+        checkMask = 0;
     }
     return checkers;
 }

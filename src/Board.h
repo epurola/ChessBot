@@ -41,6 +41,8 @@ class Board
 public:
     Board();
 
+    Board(const std::shared_ptr<Board>& other);
+
     void setFen(const std::string &fen);
     bool gameOver(bool maximizingPlayer);
     uint64_t generatePawnMovesForKing(int square, char piece);
