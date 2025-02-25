@@ -1,30 +1,12 @@
 #include "ChessboardWidget.h"
-#include <QPainter>
-#include <QMouseEvent>
-#include <QDebug>
-#include <QLabel>
-#include <QPushButton>
-#include "Board.h"
-#include <thread>
+
 
 ChessBoardWidget::ChessBoardWidget(std::shared_ptr<Board> board, QWidget *parent)
     : QWidget(parent), board(board), dragging(false), draggedSquare(-1)
 {
-    setFixedSize(800, 800);
+   
     loadImages();
     // Load images for chess pieces
-
-    QPushButton *undoButton = new QPushButton("Undo Move", this);
-    undoButton->setGeometry(0, 10, 120, 40);
-    connect(undoButton, &QPushButton::clicked, this, &ChessBoardWidget::undoMove);
-
-    QPushButton *toggleButton = new QPushButton("Toggle AI", this);
-    toggleButton->setGeometry(650, 60, 120, 40);
-    connect(toggleButton, &QPushButton::clicked, this, &ChessBoardWidget::toggleAIMove);
-
-    QPushButton *isWhiteButton = new QPushButton("IsWhite", this);
-    isWhiteButton->setGeometry(0, 60, 120, 40);
-    connect(isWhiteButton, &QPushButton::clicked, this, &ChessBoardWidget::toggleIsWhite);
 
     isWhite = true;
     /*evalLabel = new QLabel(this);
@@ -41,7 +23,8 @@ void ChessBoardWidget::toggleAIMove()
     Evaluation evaluate(board);
     auto start = std::chrono::high_resolution_clock::now();
     //auto [bestScore, bestmove] = root.setUpMultiThreading(board, 7, isWhite);
-    auto [bestScore, bestmove] = root.iterativeDeepening(board, 6, isWhite, evaluate);
+    auto [bestScore, bestmove] = root.iterativeDeepening(board, 7, isWhite, evaluate);
+  
     auto end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> duration = end - start;
 
@@ -64,7 +47,8 @@ void ChessBoardWidget::undoMove()
 
     board->undoMove(lastMove.from, lastMove.to, lastMove.capturedPiece, lastMove.enpSquare, lastMove.wasEnPassant,
                     lastMove.enPassantCapturedSquare, lastMove.enPassantCapturedPiece, 
-                    lastMove.wasPromotion, lastMove.originalPawn);
+                    lastMove.wasPromotion, lastMove.originalPawn, lastMove.WhiteCastleKBefore,
+                    lastMove.WhiteCastleQBefore, lastMove.BlackCastleKBefore, lastMove.BlackCastleQBefore, lastMove.hash, lastMove.whiteTurn);
 
     update();
 }
@@ -175,6 +159,7 @@ void ChessBoardWidget::mouseMoveEvent(QMouseEvent *event)
 
 void ChessBoardWidget::mousePressEvent(QMouseEvent *event)
 {
+    
     int tileSize = width() / 8;
     int row = event->position().y() / tileSize;
     int col = event->position().x() / tileSize;
@@ -395,3 +380,8 @@ void ChessBoardWidget::loadImages()
     if (blackKingPixmap.isNull())
         qDebug() << "Failed to load black king image";
 }
+
+void ChessBoardWidget::updateBoard() {
+    this->update();  // Triggers a repaint
+}
+

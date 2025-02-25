@@ -12,27 +12,34 @@
 #include "Node.h"
 #include <thread>
 #include <chrono>
+#include <QPainter>
+#include <QDebug>
+#include <QPushButton>
 
 class ChessBoardWidget : public QWidget
 {
     Q_OBJECT
 
+    public slots:
+    void updateBoard();
+
 public:
     explicit ChessBoardWidget(std::shared_ptr<Board> board, QWidget *parent = nullptr);
     ~ChessBoardWidget();
 
+    
+
     std::thread worker;
 
-protected:
     void paintEvent(QPaintEvent *event) override;
     void mousePressEvent(QMouseEvent *event) override;
     void mouseMoveEvent(QMouseEvent *event) override;
     void mouseReleaseEvent(QMouseEvent *event) override;
-
     int getSquareIndex(const std::string &square);
     std::pair<int, int> parseMove(const std::string &move);
     void undoMove();
     void toggleAIMove();
+    void toggleIsWhite();
 
 private:
     std::shared_ptr<Board> board;
@@ -61,7 +68,7 @@ private:
     QPoint dragOffset;
 
     void loadImages();
-    void toggleIsWhite();
+    
 };
 
 #endif

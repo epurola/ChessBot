@@ -1,7 +1,7 @@
-# Minimum CMake version required
+
 cmake_minimum_required(VERSION 3.14)
 
-# Project name and C++ standard
+
 project(chessEngine LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -15,18 +15,19 @@ set(CMAKE_AUTORCC ON)
 # Find Qt modules
 find_package(Qt6 REQUIRED COMPONENTS Core Widgets Concurrent)
 
-# Define source files
-set(SOURCES
-    src/main.cpp
+
+set(COMMON_SOURCES
     src/ChessBoardWidget.cpp
     src/BitBoard.cpp
     src/Board.cpp
     src/AttackTable.cpp
     src/Evaluation.cpp
     src/Node.cpp
+    src/Uci.cpp
+    src/ChessGameManager.cpp
 )
 
-# Define header files
+
 set(HEADERS
     src/ChessBoardWidget.h
     src/BitBoard.h
@@ -34,22 +35,18 @@ set(HEADERS
     src/AttackTable.h
     src/Evaluation.h
     src/Node.h
+    src/Uci.h
+    src/ChessGameManager.h
 )
 
-# Add the executable
-add_executable(chessEngine ${SOURCES} ${HEADERS})
+# Create first executable GUI
+add_executable(GUI src/main.cpp ${COMMON_SOURCES} ${HEADERS})
+target_link_libraries(GUI PRIVATE Qt6::Core Qt6::Widgets Qt6::Concurrent)
+target_include_directories(GUI PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
-# Link Qt libraries (Added Qt6::Concurrent for multithreading)
+# Create second executable (chessEngine)
+add_executable(chessEngine src/main2.cpp ${COMMON_SOURCES} ${HEADERS})
 target_link_libraries(chessEngine PRIVATE Qt6::Core Qt6::Widgets Qt6::Concurrent)
-
-# Include directories
 target_include_directories(chessEngine PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
-
-
-# Ensure resources are copied to the build directory (Fix path)
-add_custom_command(TARGET chessEngine POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_directory
-        ${CMAKE_SOURCE_DIR}/resources
-        ${CMAKE_BINARY_DIR}/resources
-)
+file(COPY ${CMAKE_SOURCE_DIR}/resources DESTINATION ${CMAKE_BINARY_DIR})

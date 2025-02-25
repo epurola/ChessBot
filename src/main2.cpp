@@ -8,11 +8,6 @@ int main(int argc, char *argv[]) {
 
     auto board = std::make_shared<Board>(); 
 
-    // Create a shared board instance
-   ChessGameManager gameManager(board);
-
-   /*
-   
    
     //ChessBoardWidget *widget = new ChessBoardWidget(board);
    // widget->show();
@@ -27,7 +22,7 @@ int main(int argc, char *argv[]) {
            break;  // Exit loop on "quit" command
        }
    }
-*/
+
   
     return app.exec();
 }
