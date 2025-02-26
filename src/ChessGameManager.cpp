@@ -90,7 +90,7 @@ ChessGameManager::ChessGameManager(std::shared_ptr<Board> board, QObject *parent
     window->show();
 
     // Start engines"C:\Users\eelip\chessEngine.exe"
-    engine1.start("C:/Users/eelip/chessEngine/build/Debug/chessEngine_v1.exe");
+    engine1.start("C:/Users/eelip/chessEngine/build/Debug/chessEngine.exe");
     engine2.start("C:/Users/eelip/chessEngine/build/Debug/chessEngine_v1.exe");
 
     if (!engine1.waitForStarted() || !engine2.waitForStarted())
@@ -106,7 +106,7 @@ void ChessGameManager::startGame()
 {
     QString output;
     sendCommandToEngine(&engine1, "ucinewgame");
-    sendCommandToEngine(&engine1, "setoption 4");
+    sendCommandToEngine(&engine1, "setoption 5");
     sendCommandToEngine(&engine2, "ucinewgame");
     sendCommandToEngine(&engine2, "setoption 4");
     isWhiteTurn = board->whiteToMove;

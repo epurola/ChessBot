@@ -41,10 +41,10 @@ public:
     bool gameOver = false;
     int hits = 0;
     std::pair<int, int> previousBestMoves[4]; 
+
     std::unordered_map<int, std::pair<int, int>> killerMoves;  
 
 private:
-    void printMoves(const std::vector<std::string>& moves);
     std::pair<int, int> previousBestMove = {-1, -1}; 
 };
 

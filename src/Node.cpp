@@ -174,9 +174,10 @@ std::pair<int, std::pair<int, int>> Node::minimax(std::shared_ptr<Board> board, 
         board->movePiece(moveFrom, moveTo);
         Move lastMove = board->getLastMove();
 
-        bool isLateMove = (i >= nonCaptureStart) && (depth >= 3);
-
-        int newDepth = depth - 1;
+        //bool isLateMove = (i >= 20) && (depth >= 3);
+        
+        //int reduction = isLateMove ? 1 : 0;
+        int newDepth = depth - 1 ;
         int childScore = minimax(board, newDepth, !maximizingPlayer, alpha, beta, evaluate).first;
 
         nodesExplored++;
@@ -246,14 +247,6 @@ std::pair<int, std::pair<int, int>> Node::minimax(std::shared_ptr<Board> board, 
     return {bestScore, bestMove};
 }
 
-void Node::printMoves(const std::vector<std::string> &moves)
-{
-    std::cout << "Legal moves: " << std::endl;
-    for (const std::string &moveStr : moves)
-    {
-        std::cout << moveStr << std::endl;
-    }
-}
 
 /*if (bestMove.first != -1 && bestMove.second != -1)
     {
