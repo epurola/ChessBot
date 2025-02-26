@@ -110,6 +110,7 @@ bool Board::isThreefoldRepetition()
     return false;
 }
 
+
 /**
  * @brief Initializes the Zobrist hashing table with random values.
  *
@@ -935,7 +936,7 @@ void Board::restoreCapturedPiece(int square, char piece)
  */
 bool Board::movePiece(int from, int to)
 {
-    computeZobristHash();
+    //computeZobristHash();
     uint64_t hash = getZobristHash();
     gameFensHistory[hash]++;
 
