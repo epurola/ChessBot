@@ -1,5 +1,4 @@
 # BotFish ♟️🐟  
-Under construction
 You have heard of **Stockfish**, now get ready for **BotFish**!  
 
 # Current Rating: Around 2000 elo
@@ -15,6 +14,8 @@ A powerful chess engine built with C++ that implements **iterative deepening**, 
 - **Bitboard Representation** for fast board evaluation  
 - **Move Ordering** (including trying previous best moves first)  
 - **Basic Evaluation Function** (piece-square tables, open files for rooks, etc.)  
-- **Legal Move Generation** with optimized board representation  
+- **Legal Move Generation** with optimized board representation
+
+  You will need QT in your path to build this
 
 
