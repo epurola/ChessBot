@@ -16,6 +16,5 @@ A powerful chess engine built with C++ that implements **iterative deepening**, 
 - **Basic Evaluation Function** (piece-square tables, open files for rooks, etc.)  
 - **Legal Move Generation** with optimized board representation
 
-  You will need QT in your path to build this
-
+ToDo: Remove Qt and use CFrame for UI
 
