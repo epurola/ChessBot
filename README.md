@@ -10,7 +10,7 @@ A powerful chess engine built with C++ that implements **iterative deepening**, 
 ## ⚡ Features  
 
 - **Minimax Algorithm** with Alpha-Beta Pruning  
-- **Iterative Deepening** to improve move selection  
+- **Iterative Deepening** 
 - **Bitboard Representation** for fast board evaluation  
 - **Move Ordering** (including trying previous best moves first)  
 - **Basic Evaluation Function** (piece-square tables, open files for rooks, etc.)  
