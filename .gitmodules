@@ -1,0 +1,3 @@
+[submodule "src/vendor/CFrame"]
+	path = src/vendor/CFrame
+	url = https://github.com/epurola/CFrame.git
