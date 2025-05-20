@@ -49,4 +49,18 @@ add_executable(chessEngine src/main2.cpp ${COMMON_SOURCES} ${HEADERS})
 target_link_libraries(chessEngine PRIVATE Qt6::Core Qt6::Widgets Qt6::Concurrent)
 target_include_directories(chessEngine PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
+add_subdirectory(src/vendor/CFrame/CFrame)
+
+add_executable(
+CFrameUI 
+src/CFrameUI.cpp 
+src/ChessBoard/ChessBoard.cpp
+src/ChessBoard/ChessBoard.h
+src/ChessBoard/ChessPiece.h
+src/ChessBoard/ChessPiece.cpp)
+
+target_link_libraries(CFrameUI CFrame)
+
 file(COPY ${CMAKE_SOURCE_DIR}/resources DESTINATION ${CMAKE_BINARY_DIR})
+
+add_definitions(-DCF_PLATFORM_WINDOWS)
