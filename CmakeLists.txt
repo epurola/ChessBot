@@ -57,7 +57,17 @@ src/CFrameUI.cpp
 src/ChessBoard/ChessBoard.cpp
 src/ChessBoard/ChessBoard.h
 src/ChessBoard/ChessPiece.h
-src/ChessBoard/ChessPiece.cpp)
+src/ChessBoard/ChessPiece.cpp
+src/BitBoard.h
+src/Board.h
+src/AttackTable.h
+src/Evaluation.h
+src/BitBoard.cpp
+src/Board.cpp
+src/AttackTable.cpp
+src/Evaluation.cpp
+src/Node.cpp
+)
 
 target_link_libraries(CFrameUI CFrame)
 

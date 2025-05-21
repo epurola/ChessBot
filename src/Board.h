@@ -4,7 +4,7 @@
 #include "BitBoard.h"
 #include <cctype>
 #include <cstdlib>
-#include <AttackTable.h>
+#include "AttackTable.h"
 #include <unordered_map>
 #include <random>
 #include <cstdint>
