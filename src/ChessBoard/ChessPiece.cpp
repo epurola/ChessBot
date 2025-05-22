@@ -1,7 +1,7 @@
 #include "ChessPiece.h"
 
-ChessPiece::ChessPiece( std::string path)
-	:Image(path)
+ChessPiece::ChessPiece( std::string path, PieceColor color, PieceType type)
+	:Image(path), type(type), color(color)
 {
 	SetBorder(5);
 	SetBorderColor(Color::Gold);

@@ -75,13 +75,20 @@ bool ChessBoard::MouseReleaseEvent(CFrame::MouseButtonReleasedEvent &event)
 		int row = localY / cellHeight;
 		int toIndex = row * 8 + col;
 		// This can be used to place an child to a different cell after it was removed.
-		if (static_cast<ChessPiece *>(GetChild(toIndex)) == nullptr)
+		auto toPiece = static_cast<ChessPiece *>(GetChild(toIndex));
+
+		if (toPiece == nullptr)
 		{
 			InsertChild(selectedPiece, toIndex); // Do not use AddChild() since it will also add to the child list
 		}
-		else
+		else if(toPiece->GetColor() == selectedPiece->GetColor())
 		{
 			InsertChild(selectedPiece, index); // Put it back if the cell is already in use
+		}
+		else
+		{
+      		RemoveChild(toIndex);
+			InsertChild(selectedPiece, toIndex);
 		}
 
 		UpdateChildSizes();
@@ -93,41 +100,41 @@ bool ChessBoard::MouseReleaseEvent(CFrame::MouseButtonReleasedEvent &event)
 
 void ChessBoard::InitializeBoard()
 {
-	ChessPiece *b1 = new ChessPiece("C:/dev/CFrame/SandBox/src/Images/black-rook.png");
-	ChessPiece *b2 = new ChessPiece("C:/dev/CFrame/SandBox/src/Images/black-knight.png");
-	ChessPiece *b3 = new ChessPiece("C:/dev/CFrame/SandBox/src/Images/black-bishop.png");
-	ChessPiece *b4 = new ChessPiece("C:/dev/CFrame/SandBox/src/Images/black-queen.png");
-	ChessPiece *b5 = new ChessPiece("C:/dev/CFrame/SandBox/src/Images/black-king.png");
-	ChessPiece *b6 = new ChessPiece("C:/dev/CFrame/SandBox/src/Images/black-bishop.png");
-	ChessPiece *b7 = new ChessPiece("C:/dev/CFrame/SandBox/src/Images/black-knight.png");
-	ChessPiece *b8 = new ChessPiece("C:/dev/CFrame/SandBox/src/Images/black-rook.png");
-	ChessPiece *b9 = new ChessPiece("C:/dev/CFrame/SandBox/src/Images/black-pawn.png");
+	ChessPiece *b1 = new ChessPiece("C:/dev/CFrame/SandBox/src/Images/black-rook.png", PieceColor::BLACK, PieceType::ROOK);
+	ChessPiece *b2 = new ChessPiece("C:/dev/CFrame/SandBox/src/Images/black-knight.png", PieceColor::BLACK, PieceType::KNIGHT);
+	ChessPiece *b3 = new ChessPiece("C:/dev/CFrame/SandBox/src/Images/black-bishop.png", PieceColor::BLACK, PieceType::BISHOP);
+	ChessPiece *b4 = new ChessPiece("C:/dev/CFrame/SandBox/src/Images/black-queen.png", PieceColor::BLACK, PieceType::QUEEN);
+	ChessPiece *b5 = new ChessPiece("C:/dev/CFrame/SandBox/src/Images/black-king.png", PieceColor::BLACK, PieceType::KING);
+	ChessPiece *b6 = new ChessPiece("C:/dev/CFrame/SandBox/src/Images/black-bishop.png", PieceColor::BLACK, PieceType::BISHOP);
+	ChessPiece *b7 = new ChessPiece("C:/dev/CFrame/SandBox/src/Images/black-knight.png", PieceColor::BLACK, PieceType::KNIGHT);
+	ChessPiece *b8 = new ChessPiece("C:/dev/CFrame/SandBox/src/Images/black-rook.png", PieceColor::BLACK, PieceType::ROOK);
+	ChessPiece *b9 = new ChessPiece("C:/dev/CFrame/SandBox/src/Images/black-pawn.png", PieceColor::BLACK, PieceType::PAWN);
 
-	ChessPiece *b10 = new ChessPiece("C:/dev/CFrame/SandBox/src/Images/black-pawn.png");
-	ChessPiece *b11 = new ChessPiece("C:/dev/CFrame/SandBox/src/Images/black-pawn.png");
-	ChessPiece *b12 = new ChessPiece("C:/dev/CFrame/SandBox/src/Images/black-pawn.png");
-	ChessPiece *b13 = new ChessPiece("C:/dev/CFrame/SandBox/src/Images/black-pawn.png");
-	ChessPiece *b14 = new ChessPiece("C:/dev/CFrame/SandBox/src/Images/black-pawn.png");
-	ChessPiece *b15 = new ChessPiece("C:/dev/CFrame/SandBox/src/Images/black-pawn.png");
-	ChessPiece *b16 = new ChessPiece("C:/dev/CFrame/SandBox/src/Images/black-pawn.png");
+	ChessPiece *b10 = new ChessPiece("C:/dev/CFrame/SandBox/src/Images/black-pawn.png", PieceColor::BLACK, PieceType::PAWN);
+	ChessPiece *b11 = new ChessPiece("C:/dev/CFrame/SandBox/src/Images/black-pawn.png", PieceColor::BLACK, PieceType::PAWN);
+	ChessPiece *b12 = new ChessPiece("C:/dev/CFrame/SandBox/src/Images/black-pawn.png", PieceColor::BLACK, PieceType::PAWN);
+	ChessPiece *b13 = new ChessPiece("C:/dev/CFrame/SandBox/src/Images/black-pawn.png", PieceColor::BLACK, PieceType::PAWN);
+	ChessPiece *b14 = new ChessPiece("C:/dev/CFrame/SandBox/src/Images/black-pawn.png", PieceColor::BLACK, PieceType::PAWN);
+	ChessPiece *b15 = new ChessPiece("C:/dev/CFrame/SandBox/src/Images/black-pawn.png", PieceColor::BLACK, PieceType::PAWN);
+	ChessPiece *b16 = new ChessPiece("C:/dev/CFrame/SandBox/src/Images/black-pawn.png", PieceColor::BLACK, PieceType::PAWN);
 
-	ChessPiece *w1 = new ChessPiece("C:/dev/CFrame/SandBox/src/Images/white-rook.png");
-	ChessPiece *w2 = new ChessPiece("C:/dev/CFrame/SandBox/src/Images/white-knight.png");
-	ChessPiece *w3 = new ChessPiece("C:/dev/CFrame/SandBox/src/Images/white-bishop.png");
-	ChessPiece *w4 = new ChessPiece("C:/dev/CFrame/SandBox/src/Images/white-queen.png");
-	ChessPiece *w5 = new ChessPiece("C:/dev/CFrame/SandBox/src/Images/white-king.png");
-	ChessPiece *w6 = new ChessPiece("C:/dev/CFrame/SandBox/src/Images/white-bishop.png");
-	ChessPiece *w7 = new ChessPiece("C:/dev/CFrame/SandBox/src/Images/white-knight.png");
-	ChessPiece *w8 = new ChessPiece("C:/dev/CFrame/SandBox/src/Images/white-rook.png");
+	ChessPiece *w1 = new ChessPiece("C:/dev/CFrame/SandBox/src/Images/white-rook.png", PieceColor::WHITE, PieceType::ROOK);
+	ChessPiece *w2 = new ChessPiece("C:/dev/CFrame/SandBox/src/Images/white-knight.png", PieceColor::WHITE, PieceType::KNIGHT);
+	ChessPiece *w3 = new ChessPiece("C:/dev/CFrame/SandBox/src/Images/white-bishop.png", PieceColor::WHITE, PieceType::BISHOP);
+	ChessPiece *w4 = new ChessPiece("C:/dev/CFrame/SandBox/src/Images/white-queen.png", PieceColor::WHITE, PieceType::QUEEN);
+	ChessPiece *w5 = new ChessPiece("C:/dev/CFrame/SandBox/src/Images/white-king.png", PieceColor::WHITE, PieceType::KING);
+	ChessPiece *w6 = new ChessPiece("C:/dev/CFrame/SandBox/src/Images/white-bishop.png", PieceColor::WHITE, PieceType::BISHOP);
+	ChessPiece *w7 = new ChessPiece("C:/dev/CFrame/SandBox/src/Images/white-knight.png", PieceColor::WHITE, PieceType::KNIGHT);
+	ChessPiece *w8 = new ChessPiece("C:/dev/CFrame/SandBox/src/Images/white-rook.png", PieceColor::WHITE, PieceType::ROOK);
 
-	ChessPiece *w9 = new ChessPiece("C:/dev/CFrame/SandBox/src/Images/white-pawn.png");
-	ChessPiece *w10 = new ChessPiece("C:/dev/CFrame/SandBox/src/Images/white-pawn.png");
-	ChessPiece *w11 = new ChessPiece("C:/dev/CFrame/SandBox/src/Images/white-pawn.png");
-	ChessPiece *w12 = new ChessPiece("C:/dev/CFrame/SandBox/src/Images/white-pawn.png");
-	ChessPiece *w13 = new ChessPiece("C:/dev/CFrame/SandBox/src/Images/white-pawn.png");
-	ChessPiece *w14 = new ChessPiece("C:/dev/CFrame/SandBox/src/Images/white-pawn.png");
-	ChessPiece *w15 = new ChessPiece("C:/dev/CFrame/SandBox/src/Images/white-pawn.png");
-	ChessPiece *w16 = new ChessPiece("C:/dev/CFrame/SandBox/src/Images/white-pawn.png");
+	ChessPiece *w9 = new ChessPiece("C:/dev/CFrame/SandBox/src/Images/white-pawn.png", PieceColor::WHITE, PieceType::PAWN);
+	ChessPiece *w10 = new ChessPiece("C:/dev/CFrame/SandBox/src/Images/white-pawn.png", PieceColor::WHITE, PieceType::PAWN);
+	ChessPiece *w11 = new ChessPiece("C:/dev/CFrame/SandBox/src/Images/white-pawn.png", PieceColor::WHITE, PieceType::PAWN);
+	ChessPiece *w12 = new ChessPiece("C:/dev/CFrame/SandBox/src/Images/white-pawn.png", PieceColor::WHITE, PieceType::PAWN);
+	ChessPiece *w13 = new ChessPiece("C:/dev/CFrame/SandBox/src/Images/white-pawn.png", PieceColor::WHITE, PieceType::PAWN);
+	ChessPiece *w14 = new ChessPiece("C:/dev/CFrame/SandBox/src/Images/white-pawn.png", PieceColor::WHITE, PieceType::PAWN);
+	ChessPiece *w15 = new ChessPiece("C:/dev/CFrame/SandBox/src/Images/white-pawn.png", PieceColor::WHITE, PieceType::PAWN);
+	ChessPiece *w16 = new ChessPiece("C:/dev/CFrame/SandBox/src/Images/white-pawn.png", PieceColor::WHITE, PieceType::PAWN);
 
 	SetLayout(8, 8);
 	SetBackgroundImage("C:/dev/CFrame/SandBox/src/Images/board.png");
