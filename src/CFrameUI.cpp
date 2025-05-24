@@ -41,6 +41,20 @@ public:
 
 		AiMove->SetOnLeave([AiMove]()
 						   { AiMove->StartAnimation<CFrame::Scale>(1.05f, 1.0f, 0.1f, AnimationEndBehavior::None); });
+		
+		CFrame::Button *togglePlayer = new CFrame::Button(200, 50);
+		togglePlayer->SetColor(Color::Blue);
+		togglePlayer->SetBorder(3);
+		togglePlayer->SetBorderColor(Color::DarkGray);
+		togglePlayer->SetText("Toggle player");
+		togglePlayer->SetOnClick([this]()
+						   { isWhite = !isWhite; });
+
+		togglePlayer->SetOnHover([togglePlayer]()
+						   { togglePlayer->StartAnimation<CFrame::Scale>(1.0f, 1.05f, 0.1f, AnimationEndBehavior::None); });
+
+		togglePlayer->SetOnLeave([togglePlayer]()
+						   { togglePlayer->StartAnimation<CFrame::Scale>(1.05f, 1.0f, 0.1f, AnimationEndBehavior::None); });
 
 		vbox->AddChild(hbox);
 
@@ -48,6 +62,8 @@ public:
 		grid = new ChessBoard(680, 680, board);
 
 		buttons->AddChild(AiMove);
+		buttons->AddChild(togglePlayer);
+		buttons->SetSpacing(20);
 		hbox->AddChild(buttons);
 		hbox->AddChild(grid);
 		hbox->AddChild(Info);

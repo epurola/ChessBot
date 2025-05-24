@@ -13,10 +13,16 @@ ChessBoard::~ChessBoard()
 void ChessBoard::MovePiece(int from, int to)
 {
 	auto selectedPiece = static_cast<ChessPiece *>(GetChild(from));
+	auto toPiece = static_cast<ChessPiece *>(GetChild(to));
 	if (selectedPiece)
 	{
+		if(toPiece)
+		{
+			RemoveChild(to);
+		}
 		RemoveChild(from);
 		InsertChild(selectedPiece, to);
+		board->movePiece(from, to);
 	}
 	UpdateChildSizes();
 }
@@ -80,6 +86,7 @@ bool ChessBoard::MouseReleaseEvent(CFrame::MouseButtonReleasedEvent &event)
 		if (toPiece == nullptr)
 		{
 			InsertChild(selectedPiece, toIndex); // Do not use AddChild() since it will also add to the child list
+			board->movePiece(index, toIndex);
 		}
 		else if(toPiece->GetColor() == selectedPiece->GetColor())
 		{
@@ -89,6 +96,7 @@ bool ChessBoard::MouseReleaseEvent(CFrame::MouseButtonReleasedEvent &event)
 		{
       		RemoveChild(toIndex);
 			InsertChild(selectedPiece, toIndex);
+			board->movePiece(index, toIndex);
 		}
 
 		UpdateChildSizes();
@@ -160,8 +168,8 @@ void ChessBoard::InitializeBoard()
 	AddChild(w1, 63);
 	AddChild(w2, 62);
 	AddChild(w3, 61);
-	AddChild(w4, 60);
-	AddChild(w5, 59);
+	AddChild(w4, 59);
+	AddChild(w5, 60);
 	AddChild(w6, 58);
 	AddChild(w7, 57);
 	AddChild(w8, 56);
