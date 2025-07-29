@@ -13,7 +13,7 @@ A powerful chess engine built with C++ that implements **iterative deepening**, 
 - **Iterative Deepening** 
 - **Bitboard Representation** for fast board evaluation  
 - **Move Ordering** (including trying previous best moves first)  
-- **Basic Evaluation Function** (piece-square tables, open files for rooks, etc.)  
+- **Basic Evaluation Function** 
 - **Legal Move Generation** with optimized board representation
 
 ToDo: Remove Qt and use CFrame for UI
