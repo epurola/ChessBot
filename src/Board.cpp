@@ -429,7 +429,7 @@ void Board::storeMove(int from, int to, char capturedPiece, uint64_t enpSquare,
     }
 
     // Create and store the move
-    moveHistory[moveCount++] = Move{
+    moveHistory[moveCount++] = LastMove{
         from, to, capturedPiece, enpSquare, wasEnPassant,
         enPassantCapturedSquare,
         enPassantCapturedPiece,
@@ -457,12 +457,12 @@ void Board::storeMove(int from, int to, char capturedPiece, uint64_t enpSquare,
  * is returned.
  * @note Used in minimax to undo the moves when backtracking.
  */
-Move Board::getLastMove()
+LastMove Board::getLastMove()
 {
     if (moveCount == 0)
     {
         // Return a default move or handle as you wish.
-        return Move{};
+        return LastMove{};
     }
     return moveHistory[moveCount - 1];
 }
@@ -501,8 +501,8 @@ bool Board::gameOver(bool maximizingPlayer)
     if (moves == 0)
     {
         constexpr int MAX_MOVES = 218;
-        std::pair<int, int> legalMoves[MAX_MOVES];
-        int moveCount = getAllLegalMovesAsArray(legalMoves, maximizingPlayer).first;
+        Move legalMoves[MAX_MOVES];
+        int moveCount = getAllLegalMovesAsArray(legalMoves, maximizingPlayer).from;
 
         return (moveCount == 0);
     }
@@ -2024,15 +2024,15 @@ uint64_t Board::generateQueenMovesWithProtection(int square, char piece)
  * The function prioritizes certain types of moves, such as capture moves and king castling moves.
  */
 
-std::pair<int, int> Board::getAllLegalMovesAsArray(std::pair<int, int> movesList[], bool maximizingPlayer)
+Move Board::getAllLegalMovesAsArray(Move movesList[], bool maximizingPlayer)
 {
     int moveCount = 0;
     int captureCount = 0;
     int attackedCount = 0;
 
-    std::pair<int, int> captureMoves[218];
-    std::pair<int, int> nonCaptureMoves[218];
-    std::pair<int, int> pieceUnderAttack[218];
+    Move captureMoves[218];
+    Move nonCaptureMoves[218];
+    Move pieceUnderAttack[218];
 
     uint64_t AllPieces = maximizingPlayer ? getWhitePieces() : getBlackPieces();
     uint64_t opponentAttacks = getOpponentAttacks(maximizingPlayer ? 'P' : 'p');
@@ -2085,16 +2085,16 @@ std::pair<int, int> Board::getAllLegalMovesAsArray(std::pair<int, int> movesList
     }
 
     // Prioritize certain moves, especially those related to check or forced moves
-    auto prioritizeMove = [&](std::pair<int, int> move) -> bool
+    auto prioritizeMove = [&](Move move) -> bool
     {
-        int fromSquare = move.first;
-        int toSquare = move.second;
+        int fromSquare = move.from;
+        int toSquare = move.to;
         char piece = getPieceAtSquare(fromSquare);
 
         // Prioritize king castling moves
         if (piece == 'k' || piece == 'K')
         {
-            if (fromSquare - move.second == 2 || fromSquare - move.second == -2) // Castling move
+            if (fromSquare - move.from == 2 || fromSquare - move.to == -2) // Castling move
             {
                 return true;
             }

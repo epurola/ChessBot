@@ -82,15 +82,15 @@ public:
 		Node root;
 		Evaluation evaluate(board);
 		auto start = std::chrono::high_resolution_clock::now();
-		auto [bestScore, bestmove] = root.iterativeDeepening(board, 6, isWhite, evaluate);
+		auto [bestScore, bestmove] = root.iterativeDeepening(board, 7, isWhite, evaluate);
 		auto end = std::chrono::high_resolution_clock::now();
 		std::chrono::duration<double> duration = end - start;
 
 		std::cout << "Minimax search took " << duration.count() << " seconds." << std::endl;
-		std::cout << "Making move: " << bestmove.first << "::" << bestmove.second << std::endl;
+		std::cout << "Making move: " << bestmove.from << "::" << bestmove.to << std::endl;
 
-		board->movePiece(bestmove.first, bestmove.second);
-		grid->MovePiece(bestmove.first, bestmove.second);
+		//board->movePiece(bestmove.from, bestmove.to);
+		grid->MovePiece(bestmove.from, bestmove.to);
 	}
 };
 

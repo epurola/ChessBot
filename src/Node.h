@@ -51,7 +51,7 @@ public:
      * @param evaluate Reference to the evaluation function.
      * @return The best move as a pair: (evaluation score, (from, to)).
      */
-    std::pair<int, std::pair<int, int>> iterativeDeepening(std::shared_ptr<Board> board, int maxDepth, bool maximizingPlayer, Evaluation &evaluate);
+    std::pair<int, Move> iterativeDeepening(std::shared_ptr<Board> board, int maxDepth, bool maximizingPlayer, Evaluation &evaluate);
 
     /**
      * @brief Minimax algorithm with alpha-beta pruning and principal variation search (PV).
@@ -69,7 +69,7 @@ public:
      * @param pvMove Move in the principal variation to prioritize.
      * @return The best move as a pair: (evaluation score, (from, to)).
      */
-    std::pair<int, std::pair<int, int>> minimax(std::shared_ptr<Board> board, int depth, bool maximizingPlayer, int alpha, int beta, Evaluation &evaluate, bool isPV, std::pair<int, int> pvMove);
+    std::pair<int, Move> minimax(std::shared_ptr<Board> board, int depth, bool maximizingPlayer, int alpha, int beta, Evaluation &evaluate, bool isPV, std::pair<int, int> pvMove);
 
       /**
      * @brief Standard minimax function with alpha-beta pruning.
@@ -85,7 +85,7 @@ public:
      * @param evaluate Reference to the evaluation function.
      * @return The best move as a pair: (evaluation score, (from, to)).
      */
-    std::pair<int, std::pair<int, int>> minimax(std::shared_ptr<Board> board, int depth, bool maximizingPlayer, int alpha, int beta, Evaluation &evaluate);
+    std::pair<int, Move> minimax(Board& board, int depth, bool maximizingPlayer, int alpha, int beta, Evaluation &evaluate);
 
     /** Move origin square index. Initialized to -10 (invalid). */
     int from = -10; 
@@ -103,10 +103,10 @@ public:
     bool gameOver = false;
 
     /** Stores previous best moves for move ordering optimizations (used in iterative deepening). */
-    std::pair<int, int> previousBestMoves[7];
+    Move previousBestMoves[7];
 
     /** Stores killer moves (strong moves from previous searches) to improve move ordering. */
-    std::unordered_map<int, std::pair<int, int>> killerMoves;
+    std::unordered_map<int, Move> killerMoves;
 
 };
 

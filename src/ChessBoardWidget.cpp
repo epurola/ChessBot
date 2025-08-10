@@ -24,7 +24,7 @@ void ChessBoardWidget::toggleAIMove()
     Evaluation evaluate(board);
     auto start = std::chrono::high_resolution_clock::now();
     //auto [bestScore, bestmove] = root.setUpMultiThreading(board, 7, isWhite);
-    auto [bestScore, bestmove] = root.iterativeDeepening(board, 6, isWhite, evaluate);
+    auto [bestScore, bestmove] = root.iterativeDeepening(board, 7, isWhite, evaluate);
   
     auto end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> duration = end - start;
@@ -32,9 +32,9 @@ void ChessBoardWidget::toggleAIMove()
     // Print the elapsed time in seconds
     std::cout << "Minimax search took " << duration.count() << " seconds." << std::endl;
 
-    std::cout << "Making move: " << bestmove.first << "::" << bestmove.second << std::endl;
+    std::cout << "Making move: " << bestmove.from << "::" << bestmove.to << std::endl;
 
-    board->movePiece(bestmove.first, bestmove.second);
+    board->movePiece(bestmove.from, bestmove.to);
     update();
 }
 
@@ -45,7 +45,7 @@ void ChessBoardWidget::toggleIsWhite()
 
 void ChessBoardWidget::undoMove()
 {
-    Move lastMove = board->getLastMove();
+    LastMove lastMove = board->getLastMove();
 
     board->undoMove(lastMove.from, lastMove.to, lastMove.capturedPiece, lastMove.enpSquare, lastMove.wasEnPassant,
                     lastMove.enPassantCapturedSquare, lastMove.enPassantCapturedPiece, 
@@ -334,51 +334,51 @@ std::pair<int, int> ChessBoardWidget::parseMove(const std::string &move)
 
 void ChessBoardWidget::loadImages()
 {
-    whitePawnPixmap = QPixmap("C:\\Users\\eelip\\chessEngine\\build\\resources\\images\\white-pawn.png");
+    whitePawnPixmap = QPixmap("C:\\Users\\eelip\\ChessBot\\build\\resources\\images\\white-pawn.png");
     if (whitePawnPixmap.isNull())
         qDebug() << "Failed to load white pawn image";
 
-    blackPawnPixmap = QPixmap("C:\\Users\\eelip\\chessEngine\\build\\resources\\images\\black-pawn.png");
+    blackPawnPixmap = QPixmap("C:\\Users\\eelip\\ChessBot\\build\\resources\\images\\black-pawn.png");
     if (blackPawnPixmap.isNull())
         qDebug() << "Failed to load black pawn image";
 
-    whiteRookPixmap = QPixmap("C:\\Users\\eelip\\chessEngine\\build\\resources\\images\\white-rook.png");
+    whiteRookPixmap = QPixmap("C:\\Users\\eelip\\ChessBot\\build\\resources\\images\\white-rook.png");
     if (whiteRookPixmap.isNull())
         qDebug() << "Failed to load white rook image";
 
-    blackRookPixmap = QPixmap("C:\\Users\\eelip\\chessEngine\\build\\resources\\images\\black-rook.png");
+    blackRookPixmap = QPixmap("C:\\Users\\eelip\\ChessBot\\build\\resources\\images\\black-rook.png");
     if (blackRookPixmap.isNull())
         qDebug() << "Failed to load black rook image";
 
-    whiteKnightPixmap = QPixmap("C:\\Users\\eelip\\chessEngine\\build\\resources\\images\\white-knight.png");
+    whiteKnightPixmap = QPixmap("C:\\Users\\eelip\\ChessBot\\build\\resources\\images\\white-knight.png");
     if (whiteKnightPixmap.isNull())
         qDebug() << "Failed to load white knight image";
 
-    blackKnightPixmap = QPixmap("C:\\Users\\eelip\\chessEngine\\build\\resources\\images\\black-knight.png");
+    blackKnightPixmap = QPixmap("C:\\Users\\eelip\\ChessBot\\build\\resources\\images\\black-knight.png");
     if (blackKnightPixmap.isNull())
         qDebug() << "Failed to load black knight image";
 
-    whiteBishopPixmap = QPixmap("C:\\Users\\eelip\\chessEngine\\build\\resources\\images\\white-bishop.png");
+    whiteBishopPixmap = QPixmap("C:\\Users\\eelip\\ChessBot\\build\\resources\\images\\white-bishop.png");
     if (whiteBishopPixmap.isNull())
         qDebug() << "Failed to load white bishop image";
 
-    blackBishopPixmap = QPixmap("C:\\Users\\eelip\\chessEngine\\build\\resources\\images\\black-bishop.png");
+    blackBishopPixmap = QPixmap("C:\\Users\\eelip\\ChessBot\\build\\resources\\images\\black-bishop.png");
     if (blackBishopPixmap.isNull())
         qDebug() << "Failed to load black bishop image";
 
-    whiteQueenPixmap = QPixmap("C:\\Users\\eelip\\chessEngine\\build\\resources\\images\\white-queen.png");
+    whiteQueenPixmap = QPixmap("C:\\Users\\eelip\\ChessBot\\build\\resources\\images\\white-queen.png");
     if (whiteQueenPixmap.isNull())
         qDebug() << "Failed to load white queen image";
 
-    blackQueenPixmap = QPixmap("C:\\Users\\eelip\\chessEngine\\build\\resources\\images\\black-queen.png");
+    blackQueenPixmap = QPixmap("C:\\Users\\eelip\\ChessBot\\build\\resources\\images\\black-queen.png");
     if (blackQueenPixmap.isNull())
         qDebug() << "Failed to load black queen image";
 
-    whiteKingPixmap = QPixmap("C:\\Users\\eelip\\chessEngine\\build\\resources\\images\\white-king.png");
+    whiteKingPixmap = QPixmap("C:\\Users\\eelip\\ChessBot\\build\\resources\\images\\white-king.png");
     if (whiteKingPixmap.isNull())
         qDebug() << "Failed to load white king image";
 
-    blackKingPixmap = QPixmap("C:\\Users\\eelip\\chessEngine\\build\\resources\\images\\black-king.png");
+    blackKingPixmap = QPixmap("C:\\Users\\eelip\\ChessBot\\build\\resources\\images\\black-king.png");
     if (blackKingPixmap.isNull())
         qDebug() << "Failed to load black king image";
 }

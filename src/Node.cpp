@@ -2,6 +2,8 @@
 #include "Board.h"
 #include "Evaluation.h"
 
+
+
 /**
  * @brief Implements Iterative Deepening Depth-First Search (IDDFS).
  * 
@@ -14,9 +16,9 @@
  * @param evaluate Reference to the evaluation function.
  * @return Best move found as a pair: (evaluation score, (from, to)).
  */
-std::pair<int, std::pair<int, int>> Node::iterativeDeepening(std::shared_ptr<Board> board, int maxDepth, bool maximizingPlayer, Evaluation &evaluate)
+std::pair<int, Move> Node::iterativeDeepening(std::shared_ptr<Board> board, int maxDepth, bool maximizingPlayer, Evaluation &evaluate)
 {
-    std::pair<int, int> bestMove = {-5, -1};
+    Move bestMove = {-5, -1};
     int bestEval = maximizingPlayer ? std::numeric_limits<int>::min(): 
                                       std::numeric_limits<int>::max();
 
@@ -24,7 +26,7 @@ std::pair<int, std::pair<int, int>> Node::iterativeDeepening(std::shared_ptr<Boa
     {
         gameOver = false;
         nodesExplored = 0;
-        std::pair<int, std::pair<int, int>> result = minimax(board, depth, maximizingPlayer, 
+        std::pair<int, Move> result = minimax(*board, depth, maximizingPlayer, 
                                                              std::numeric_limits<int>::min(), 
                                                              std::numeric_limits<int>::max(), 
                                                              evaluate);
@@ -37,12 +39,12 @@ std::pair<int, std::pair<int, int>> Node::iterativeDeepening(std::shared_ptr<Boa
         {
             break;
         }
-        std::cout << "Depth " << depth << " completed. Best Move: (" << bestMove.first
-                  << " -> " << bestMove.second << "), Eval: " << bestEval
+        std::cout << "Depth " << depth << " completed. Best Move: (" << bestMove.from
+                  << " -> " << bestMove.to << "), Eval: " << bestEval
                   << ", Nodes explored: " << nodesExplored << std::endl;
     }
 
-    std::cout << "Iterative Deepening Complete. Best Move: (" << bestMove.first << " -> " << bestMove.second << "), Final Eval: " << bestEval << std::endl;
+    std::cout << "Iterative Deepening Complete. Best Move: (" << bestMove.from << " -> " << bestMove.to << "), Final Eval: " << bestEval << std::endl;
     std::cout << "Nodes: " << nodesExplored << std::endl;
 
     return {bestEval, bestMove};
@@ -62,15 +64,18 @@ std::pair<int, std::pair<int, int>> Node::iterativeDeepening(std::shared_ptr<Boa
  * @param evaluate Reference to the evaluation function.
  * @return Best move as a pair: (evaluation score, (from, to)).
  */
-std::pair<int, std::pair<int, int>> Node::minimax(std::shared_ptr<Board> board, int depth, bool maximizingPlayer, int alpha, int beta, Evaluation &evaluate)
+std::pair<int, Move> Node::minimax(Board& board, int depth, bool maximizingPlayer, int alpha, int beta, Evaluation &evaluate)
 {
+
+    LastMove lastMove; 
+
     if (depth == 0)
     {
         int eval = evaluate.evaluatePosition();
         return {eval, {-4, -1}};
     }
 
-    if (board->isThreefoldRepetition())
+    if (board.isThreefoldRepetition())
     {
         if (maximizingPlayer)
         {
@@ -82,15 +87,15 @@ std::pair<int, std::pair<int, int>> Node::minimax(std::shared_ptr<Board> board, 
         }
     }
  
-    board->computeZobristHash();
-    uint64_t positionHash = board->getZobristHash();
+    board.computeZobristHash();
+    uint64_t positionHash = board.getZobristHash();
 
-    board->moveCount = 0;
+    board.moveCount = 0;
 
     TTEntry entry; 
 
     // Probe the transposition table
-    if (board->probeTranspositionTable(positionHash, depth, alpha, beta, entry))
+    if (board.probeTranspositionTable(positionHash, depth, alpha, beta, entry))
     {
         int transpositionEval = entry.evaluation;
         if (depth <= entry.depth)
@@ -112,22 +117,22 @@ std::pair<int, std::pair<int, int>> Node::minimax(std::shared_ptr<Board> board, 
     
 
     constexpr int MAX_MOVES = 256;
-    std::pair<int, int> moves[MAX_MOVES];
-    std::pair<int, int> moveData = board->getAllLegalMovesAsArray(moves, maximizingPlayer);
-    int moveCount = moveData.first;
-    int nonCaptureStart = moveData.second;
+    Move moves[MAX_MOVES];
+    Move moveData = board.getAllLegalMovesAsArray(moves, maximizingPlayer);
+    int moveCount = moveData.from;
+    int nonCaptureStart = moveData.to;
 
     if (moveCount == 0)
     {
         gameOver = true;
         nodesExplored++;
 
-        if (board->isKingInCheck(maximizingPlayer))
+        if (board.isKingInCheck(maximizingPlayer)) [[unlikely]]
         {
             int eval = maximizingPlayer ? std::numeric_limits<int>::min() : std::numeric_limits<int>::max();
             return {eval, {-3, -1}};
         }
-        else
+        else [[likely]]
         {
             return {0, {-2, -1}};
         }
@@ -145,9 +150,9 @@ std::pair<int, std::pair<int, int>> Node::minimax(std::shared_ptr<Board> board, 
         }
     }
 
-    if (killerMoves[depth] != std::pair<int, int>{-1, -1})
+    if (killerMoves[depth] != Move{-1, -1})
     {
-        std::pair<int, int> killerMove = killerMoves[depth];
+        Move killerMove = killerMoves[depth];
 
         for (int i = 0; i < moveCount; i++)
         {
@@ -160,16 +165,16 @@ std::pair<int, std::pair<int, int>> Node::minimax(std::shared_ptr<Board> board, 
     }
 
     int bestScore = maximizingPlayer ? std::numeric_limits<int>::min() : std::numeric_limits<int>::max();
-    std::pair<int, int> bestMove = {moves[0].first, moves[0].second};
+    Move bestMove = {moves[0].from, moves[0].to};
 
     for (int i = 0; i < moveCount; i++)
     {
 
-        int moveFrom = moves[i].first;
-        int moveTo = moves[i].second;
+        int moveFrom = moves[i].from;
+        int moveTo = moves[i].to;
 
-        board->movePiece(moveFrom, moveTo);
-        Move lastMove = board->getLastMove();
+        board.movePiece(moveFrom, moveTo);
+        lastMove = board.getLastMove();
 
         //bool isLateMove = (i >= 20) && (depth >= 3);
         
@@ -180,7 +185,7 @@ std::pair<int, std::pair<int, int>> Node::minimax(std::shared_ptr<Board> board, 
         nodesExplored++;
 
         //  Undo Move
-        board->undoMove(lastMove.from, lastMove.to, lastMove.capturedPiece, lastMove.enpSquare, lastMove.wasEnPassant,
+        board.undoMove(lastMove.from, lastMove.to, lastMove.capturedPiece, lastMove.enpSquare, lastMove.wasEnPassant,
                         lastMove.enPassantCapturedSquare, lastMove.enPassantCapturedPiece,
                         lastMove.wasPromotion, lastMove.originalPawn, lastMove.WhiteCastleKBefore,
                         lastMove.WhiteCastleQBefore, lastMove.BlackCastleKBefore, lastMove.BlackCastleQBefore, lastMove.hash, lastMove.whiteTurn);
@@ -205,11 +210,11 @@ std::pair<int, std::pair<int, int>> Node::minimax(std::shared_ptr<Board> board, 
             beta = std::min(beta, bestScore);
         }
 
-        if (beta <= alpha)
+        if (beta <= alpha)[[unlikely]]
             break; //  Alpha-Beta Pruning
     }
 
-    if (bestMove.first != -1 && bestMove.second != -1)
+    if (bestMove.from != -1 && bestMove.to != -1)
     {
         // Check if bestMove is already in the previousBestMoves array
         bool found = false;
@@ -234,12 +239,12 @@ std::pair<int, std::pair<int, int>> Node::minimax(std::shared_ptr<Board> board, 
         }
     }
 
-    if (bestMove.second != -1)
+    if (bestMove.to != -1)
     {
         killerMoves[depth] = bestMove;
     }
 
-    board->storeTransposition(positionHash, depth, bestScore, alpha, beta, bestMove.first, bestMove.second);
+    board.storeTransposition(positionHash, depth, bestScore, alpha, beta, bestMove.from, bestMove.to);
 
     return {bestScore, bestMove};
 }

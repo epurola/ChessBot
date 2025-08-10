@@ -191,13 +191,13 @@ void Uci::handleGo(const std::string &parameters)
 
     std::cout << "Search took " << duration.count() << " seconds." << std::endl;
 
-    if (bestmove.first == -1 || bestmove.second == -1)
+    if (bestmove.from == -1 || bestmove.to == -1)
     {
         std::cerr << "Error: No valid move found!" << std::endl;
         return;
     }
 
-    std::cout << "bestmove " << board->moveToString(bestmove.first, bestmove.second) << std::endl;
+    std::cout << "bestmove " << board->moveToString(bestmove.from, bestmove.to) << std::endl;
 
     applyBestMove(bestmove);
 }
@@ -207,7 +207,7 @@ void Uci::handleGo(const std::string &parameters)
  * 
  * @param bestmove The best move as a pair of integers.
  */
-void Uci::applyBestMove(const std::pair<int, int> &bestmove)
+void Uci::applyBestMove(const Move &bestmove)
 {
     if (!board)
     {
@@ -215,7 +215,7 @@ void Uci::applyBestMove(const std::pair<int, int> &bestmove)
         return;
     }
 
-    board->movePiece(bestmove.first, bestmove.second);
+    board->movePiece(bestmove.from, bestmove.to);
 }
 
 /**

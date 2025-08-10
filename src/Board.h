@@ -37,7 +37,7 @@ struct TTEntry
         : evaluation(eval), depth(d), flag(f), bestFrom(bf), bestTo(bt), hash(0) {}
 };
 
-struct Move
+struct LastMove
 {
     int from, to;
     char capturedPiece;
@@ -51,6 +51,19 @@ struct Move
     bool BlackCastleKBefore, BlackCastleQBefore;
     uint64_t hash;
     bool whiteTurn;
+};
+
+
+struct Move{ 
+    int from, to; 
+
+    bool operator==(const Move& other) const{
+        return from == other.from && to == other.to;
+    }
+
+    bool operator!=(const Move &other) const {
+    return !(*this == other);
+}
 };
 
 class Board
@@ -110,7 +123,7 @@ public:
     uint64_t getOpponentAttacksWithProtection(char piece);
 
     uint16_t *getAllLegalMoves(bool maximizingPlayer);
-    std::pair<int, int> getAllLegalMovesAsArray(std::pair<int, int> movesList[], bool maximizingPlayer);
+    Move getAllLegalMovesAsArray(Move movesList[], bool maximizingPlayer);
 
     //Move gen helpers
     uint64_t findCheckers(int squareOfKing, char king, uint64_t &checkMask);
@@ -188,9 +201,9 @@ public:
     bool WhiteCanCastleK;
 
     //Move History
-    std::array<Move, MAX_MOVES> moveHistory;
+    std::array<LastMove, MAX_MOVES> moveHistory;
     size_t moveCount = 0;
-    Move getLastMove();
+    LastMove getLastMove();
     void storeMove(int from, int to, char capturedPiece, uint64_t enpSquare,
                    bool wasEnPassant, 
                    int enPassantCapturedSquare,

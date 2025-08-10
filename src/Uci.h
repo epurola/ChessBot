@@ -42,7 +42,7 @@ private:
     void handleQuit();
     
     //Apply the move on the internal board
-    void applyBestMove(const std::pair<int, int>& bestmove);
+    void applyBestMove(const Move& bestmove);
 
     //Remove extra space from the fen string
     std::string trimLeadingSpace(const std::string& str);
