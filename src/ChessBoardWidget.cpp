@@ -24,7 +24,7 @@ void ChessBoardWidget::toggleAIMove()
     Evaluation evaluate(board);
     auto start = std::chrono::high_resolution_clock::now();
     //auto [bestScore, bestmove] = root.setUpMultiThreading(board, 7, isWhite);
-    auto [bestScore, bestmove] = root.iterativeDeepening(board, 7, isWhite, evaluate);
+    auto [bestScore, bestmove] = root.iterativeDeepening(board, 9, isWhite, evaluate);
   
     auto end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> duration = end - start;

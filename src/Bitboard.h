@@ -11,7 +11,9 @@ public:
      Bitboard() : bitboard(0){}
      void setSquare(int square);
      void clearSquare(int square);
-     bool isSet(int square) const;
+     __forceinline bool isSet(int square) const {
+         return bitboard & (1ULL << square);
+     }
      int count() const ;
 };
 

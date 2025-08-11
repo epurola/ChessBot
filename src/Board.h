@@ -137,7 +137,19 @@ public:
     bool gameOver(bool maximizingPlayer);
     void printBitboard(uint64_t bitboard, const std::string &label);
 
-    int bitScanForward(uint64_t bitboard);
+    __forceinline int bitScanForward(uint64_t bitboard)
+    {
+        if (bitboard == 0)
+        {
+            return -1;
+        }
+        unsigned long index;
+        if (_BitScanForward64(&index, bitboard))
+        {
+            return index;
+        }
+        return -1;
+    }
     int pieceValue(char piece);
     int getSquareIndex(const std::string &square);
     int pieceToIndex(char piece);
@@ -235,6 +247,9 @@ public:
     bool whiteToMove;
 
     std::unordered_map<uint64_t, int> gameFensHistory;
+
+    uint64_t allPieces;
+    char pieceAt[64];
 };
 
 #endif // BOARD_H

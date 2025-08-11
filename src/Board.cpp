@@ -25,6 +25,7 @@ Board::Board()
     attackTable.initialize();
     initializeZobrist();
     zobristHash = computeZobristHash();
+    allPieces = getBlackPieces() | getWhitePieces();
 }
 
 /**
@@ -63,6 +64,7 @@ Board::Board(const std::shared_ptr<Board> &other1)
     std::copy(std::begin(other.pinMasks), std::end(other.pinMasks), std::begin(this->pinMasks));
     this->attackTable.initialize();
     this->initializeZobrist();
+    allPieces = getBlackPieces() | getWhitePieces();
 }
 
 /**
@@ -87,6 +89,7 @@ void Board::resetBoard()
     zobristHash = computeZobristHash();
     gameFensHistory.clear();
     moveCount = 0;
+    allPieces = getBlackPieces() | getWhitePieces();
 }
 
 /**
@@ -109,7 +112,6 @@ bool Board::isThreefoldRepetition()
     }
     return false;
 }
-
 
 /**
  * @brief Initializes the Zobrist hashing table with random values.
@@ -854,6 +856,8 @@ void Board::undoMove(int from, int to, char capturedPiece, uint64_t enpSquare,
     {
         restoreCapturedPiece(enpassantCapturedSquare1, enpassantCapturedPiece1);
     }
+
+    allPieces = getBlackPieces() | getWhitePieces();
 }
 
 /**
@@ -936,17 +940,14 @@ void Board::restoreCapturedPiece(int square, char piece)
  */
 bool Board::movePiece(int from, int to)
 {
-    //computeZobristHash();
+
+    // computeZobristHash();
     uint64_t hash = getZobristHash();
     gameFensHistory[hash]++;
 
     char piece = getPieceAtSquare(from);
     char destPiece = getPieceAtSquare(to);
 
-    /*if (piece == ' ')
-    {
-        return false;
-    }*/
     bool WhiteCanCastleK1 = WhiteCanCastleK;
     bool WhiteCanCastleQ1 = WhiteCanCastleQ;
     bool blackCanCastleK1 = blackCanCastleK;
@@ -1077,6 +1078,8 @@ bool Board::movePiece(int from, int to)
     }
 
     whiteToMove = !whiteToMove;
+
+    allPieces = getBlackPieces() | getWhitePieces();
     return result;
 }
 
@@ -1164,6 +1167,12 @@ void Board::clearCapturedPiece(int to, char destPiece)
  */
 char Board::getPieceAtSquare(int square)
 {
+
+    if ((allPieces & (1ULL << square)) == 0)
+    {
+        return ' ';
+    }
+
     if (whitePawns.isSet(square))
         return 'P';
     if (blackPawns.isSet(square))
@@ -1262,11 +1271,14 @@ uint64_t Board::findCheckers(int squareOfKing, char king, uint64_t &checkMask)
     // uint64_t opponentKing = color ? whiteKing.bitboard : blackKing.bitboard;
 
     uint64_t attackingPawns = opponentPawns;
+
+    uint64_t kingBit = 1ULL << squareOfKing;
+
+    char piece = color ? 'P' : 'p';
+    int colorPawn = std::islower(piece) ? 0 : 1;
     while (attackingPawns)
     {
         int pawnSquare = bitScanForward(attackingPawns);
-        char piece = getPieceAtSquare(pawnSquare);
-        int colorPawn = std::islower(piece) ? 0 : 1;
 
         uint64_t pawnAttacks = generatePawnMovesForKing(pawnSquare, piece);
 
@@ -1289,7 +1301,7 @@ uint64_t Board::findCheckers(int squareOfKing, char king, uint64_t &checkMask)
     while (knights)
     {
         int square = bitScanForward(knights);
-        if (attackTable.knightMovesTable[square] & (1ULL << squareOfKing))
+        if (attackTable.knightMovesTable[square] & kingBit)
         {
             checkers |= (1ULL << square);
         }
@@ -1297,14 +1309,16 @@ uint64_t Board::findCheckers(int squareOfKing, char king, uint64_t &checkMask)
     }
 
     uint64_t rooks = opponentRooks;
+
     while (rooks)
     {
         int square = bitScanForward(rooks);
         uint64_t blockers = getOccupiedSquares();
+
         blockers &= attackTable.rookMask[square];
 
         uint64_t hash = (blockers * attackTable.rookMagics[square]) >> (64 - attackTable.rookIndex[square]);
-        if (attackTable.rookTable[square][hash] & (1ULL << squareOfKing))
+        if (attackTable.rookTable[square][hash] & kingBit)
         {
             checkers |= (1ULL << square);
         }
@@ -1319,7 +1333,7 @@ uint64_t Board::findCheckers(int squareOfKing, char king, uint64_t &checkMask)
         blockers &= attackTable.bishopMask[square];
 
         uint64_t hash = (blockers * attackTable.bishopMagics[square]) >> (64 - attackTable.bishopIndex[square]);
-        if (attackTable.bishopTable[square][hash] & (1ULL << squareOfKing))
+        if (attackTable.bishopTable[square][hash] & kingBit)
         {
             checkers |= (1ULL << square);
         }
@@ -1337,6 +1351,7 @@ uint64_t Board::findCheckers(int squareOfKing, char king, uint64_t &checkMask)
         // Double check: The king must move, so checkMask should be 0
         checkMask = 0;
     }
+
     return checkers;
 }
 
@@ -2397,9 +2412,8 @@ uint64_t Board::generateKingMoves(int square, char piece)
             moves |= (1ULL << 62);
         }
         if (WhiteCanCastleQ &&
-            !(occupied & (1ULL << 57)) && !(occupied & (1ULL << 58)) && !(occupied & (1ULL << 59)) &&
-            !(opponentAttacks & (1ULL << 60)) &&
-            !(opponentAttacks & (1ULL << 58)) &&
+            !(occupied & ((1ULL << 57) | (1ULL << 58) | (1ULL << 59))) &&
+            !(opponentAttacks & ((1ULL << 60) | (1ULL << 59) | (1ULL << 58))) &&
             getPieceAtSquare(56) == 'R')
         {
             moves |= (1ULL << 58);
@@ -2734,7 +2748,8 @@ void Board::printBitboard(uint64_t bitboard, const std::string &label)
  * @param bitboard The 64-bit integer representing the bitboard.
  * @return int Index of the least significant set bit (0-63), or -1 if bitboard is 0.
  */
-int Board::bitScanForward(uint64_t bitboard)
+/*
+__forceinline int Board::bitScanForward(uint64_t bitboard)
 {
     if (bitboard == 0)
     {
@@ -2746,7 +2761,7 @@ int Board::bitScanForward(uint64_t bitboard)
         return index;
     }
     return -1;
-}
+}*/
 
 /**
  * @brief Converts a chess board square notation (e.g., "e2") into a 0-based index.
