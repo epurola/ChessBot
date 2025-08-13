@@ -14,11 +14,11 @@ int Evaluation::evaluatePosition()
 
     int rooks = rookOnOpenFile();
 
-    //int castlingPawns = evaluateCastlingPawns();
+    int castlingPawns = evaluateCastlingPawns();
 
-    //int rookInLineWithKing = evaluateRookInLineWithKing();
+    int rookInLineWithKing = evaluateRookInLineWithKing();
 
-    return materialScore + positionalScore + pawns + rooks ;
+    return materialScore + positionalScore + pawns + rooks + castlingPawns + rookInLineWithKing ;
 }
 
 // Evaluates material balance
@@ -294,9 +294,7 @@ uint64_t Evaluation::getFileMask(int file)
 
 int Evaluation::evaluatePieceSet(Bitboard &bitboard, int value)
 {
-    uint64_t bitMask = bitboard.bitboard;
-    __int64 count = _mm_popcnt_u64(bitMask);
-    return static_cast<int>(count) * value;
+   return bitboard.count() * value;
 }
 
 int Evaluation::evaluatePiecePosition(Bitboard &bitboard, const int table[64], bool mirror)

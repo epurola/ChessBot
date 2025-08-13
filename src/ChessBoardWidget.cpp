@@ -24,7 +24,7 @@ void ChessBoardWidget::toggleAIMove()
     Evaluation evaluate(board);
     auto start = std::chrono::high_resolution_clock::now();
     //auto [bestScore, bestmove] = root.setUpMultiThreading(board, 7, isWhite);
-    auto [bestScore, bestmove] = root.iterativeDeepening(board, 9, isWhite, evaluate);
+    auto [bestScore, bestmove] = root.iterativeDeepening(board, 8, isWhite, evaluate);
   
     auto end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> duration = end - start;
@@ -38,6 +38,11 @@ void ChessBoardWidget::toggleAIMove()
     update();
 }
 
+void ChessBoardWidget::setBoard(std::shared_ptr<Board> newBoard) {
+    board = newBoard; // store the new board pointer
+    update();         // triggers a repaint
+}
+
 void ChessBoardWidget::toggleIsWhite()
 {
     isWhite = !isWhite;
@@ -47,10 +52,7 @@ void ChessBoardWidget::undoMove()
 {
     LastMove lastMove = board->getLastMove();
 
-    board->undoMove(lastMove.from, lastMove.to, lastMove.capturedPiece, lastMove.enpSquare, lastMove.wasEnPassant,
-                    lastMove.enPassantCapturedSquare, lastMove.enPassantCapturedPiece, 
-                    lastMove.wasPromotion, lastMove.originalPawn, lastMove.WhiteCastleKBefore,
-                    lastMove.WhiteCastleQBefore, lastMove.BlackCastleKBefore, lastMove.BlackCastleQBefore, lastMove.hash, lastMove.whiteTurn);
+    board->undoMove(lastMove);
 
     update();
 }

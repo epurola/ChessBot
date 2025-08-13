@@ -90,8 +90,9 @@ ChessGameManager::ChessGameManager(std::shared_ptr<Board> board, QObject *parent
     window->show();
 
     // Start engines"C:\Users\eelip\chessEngine.exe"
-    engine1.start("C:/Users/eelip/chessEngine/build/Debug/chessEngine.exe");
-    engine2.start("C:/Users/eelip/chessEngine/build/Debug/chessEngine_v1.exe");
+    engine1.start("C:/Users/eelip/ChessBot/build/Release/chessEngineLMR.exe");
+    engine2.start("C:/Users/eelip/ChessBot/build/Release/chessEngineNOLMR.exe");
+   
 
     if (!engine1.waitForStarted() || !engine2.waitForStarted())
     {
@@ -106,9 +107,9 @@ void ChessGameManager::startGame()
 {
     QString output;
     sendCommandToEngine(&engine1, "ucinewgame");
-    sendCommandToEngine(&engine1, "setoption 5");
+    sendCommandToEngine(&engine1, "setoption 6");
     sendCommandToEngine(&engine2, "ucinewgame");
-    sendCommandToEngine(&engine2, "setoption 4");
+    sendCommandToEngine(&engine2, "setoption 5");
     isWhiteTurn = board->whiteToMove;
     output =  isWhiteTurn ? engine1.readLine() : engine2.readLine();
   
@@ -124,7 +125,8 @@ void ChessGameManager::stopGame()
 
 void ChessGameManager::restartGame()
 {
-    board->resetBoard();
+    board = std::make_shared<Board>();
+    chessBoard->setBoard(board);
     static size_t currentPositionIndex = 0;
 
     // Ensure there are positions to choose from
@@ -141,19 +143,19 @@ void ChessGameManager::restartGame()
 
     sendCommandToEngine(&engine1, "ucinewgame");
     sendCommandToEngine(&engine1, "position " + QString::fromStdString(board->getFen()));
-    sendCommandToEngine(&engine1, "setoption 4");
+    sendCommandToEngine(&engine1, "setoption 6");
     sendCommandToEngine(&engine2, "ucinewgame");
     sendCommandToEngine(&engine2, "position " + QString::fromStdString(board->getFen()));
-    sendCommandToEngine(&engine2, "setoption 4");
+    sendCommandToEngine(&engine2, "setoption 5");
 
-    QThread::msleep(2000);
+    QThread::msleep(1000);
   
     isWhiteTurn = board->whiteToMove;
 
     output =  isWhiteTurn ? engine1.readLine() : engine2.readLine();
 
     sendCommandToEngine(isWhiteTurn ? &engine1 : &engine2, "go");
-    
+
 }
 
 void ChessGameManager::sendCommandToEngine(QProcess *engine, const QString &command)
@@ -198,17 +200,10 @@ void ChessGameManager::processMove(const QString &move, bool isWhite)
     std::string moveStr = move.toStdString();                     
     std::string movePart = moveStr.substr(moveStr.find(" ") + 1); // Extract after the first space
 
-   
     auto [from, to] = board->parseMove(movePart);
-    if(board->isValidMove(from,to)){
+    
         board->movePiece(from, to);
-    }else{
-        std::cout << "NOT A VALID MOVE! " << from << "::" << to 
-              << " Piece: " << board->getPieceAtSquare(from) << std::endl;
-              std::cout << "FEN " << board->getFen() 
-              << " Piece: " << board->getPieceAtSquare(from) << std::endl;
-
-    }
+    
     emit boardUpdated();
 
     checkGameOver();
@@ -252,9 +247,9 @@ void ChessGameManager::initPositions()
 {
 
     positionStrings->push_back("r2q1rk1/2p1bppp/p1n1bn2/1p2p3/4P3/2P2N2/PPBN1PPP/R1BQR1K1 b - - 1 12");
-    positionStrings->push_back("r1bqrbk1/2p2pp1/p1np1n1p/1p2p3/4P3/PBNP1N1P/1PPB1PP1/R2Q1RK1 w - - 3 12");
+   // positionStrings->push_back("r1bqrbk1/2p2pp1/p1np1n1p/1p2p3/4P3/PBNP1N1P/1PPB1PP1/R2Q1RK1 w - - 3 12");
     positionStrings->push_back("3r2k1/2p2bpp/p2r4/P2PpP2/BR1q4/7P/5PP1/2R1Q1K1 b - - 2 35");
-    positionStrings->push_back("4r1k1/1q1b1pb1/1n1p1npp/2pPp3/2P1P3/2BB1N1P/2QN1PP1/R5K1 w - - 3 25");
+   // positionStrings->push_back("4r1k1/1q1b1pb1/1n1p1npp/2pPp3/2P1P3/2BB1N1P/2QN1PP1/R5K1 w - - 3 25");
     positionStrings->push_back("2rqr1k1/4bpp1/p2p1n1p/1p6/3QP3/1b4NP/PP3PP1/R1B1R1K1 b - - 0 20");
     positionStrings->push_back("r1bq1rk1/bpp2pp1/p1np1n1p/4p3/B3P3/2PP1N1P/PP3PP1/R1BQRNK1 b - - 3 11");
     positionStrings->push_back("r2qr1k1/4bpp1/p1n2n1p/1pppp3/4P3/1PPP1NNP/1P2QPP1/R1B1R1K1 w - - 1 17");

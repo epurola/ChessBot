@@ -79,18 +79,7 @@ public:
 
     //Move handling
     bool movePiece(int from, int to);
-    void undoMove(int from, int to, char capturedPiece, uint64_t enpSquare,
-        bool lastMoveEnPassant, 
-        int enpassantCapturedSquare, 
-        char enpassantCapturedPiece,
-        bool wasPromotion, 
-        char originalPawn, 
-        bool WhiteCastleKBefore,
-        bool WhiteCastleQBefore, 
-        bool BlackCastleKBefore, 
-        bool BlackCastleQBefore, 
-        uint64_t hash, 
-        bool whiteTurn);
+    void undoMove(LastMove lastmove);
     void restoreCapturedPiece(int square, char piece);
     bool updateBitboards(char piece, int from, int to);
     bool isValidMove(int from, int to);
@@ -213,7 +202,7 @@ public:
     bool WhiteCanCastleK;
 
     //Move History
-    std::array<LastMove, MAX_MOVES> moveHistory;
+    std::array<LastMove, 1024> moveHistory; // Yeah it is magic deal with it
     size_t moveCount = 0;
     LastMove getLastMove();
     void storeMove(int from, int to, char capturedPiece, uint64_t enpSquare,

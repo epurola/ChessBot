@@ -40,6 +40,7 @@ public:
     void undoMove();
     void toggleAIMove();
     void toggleIsWhite();
+    void setBoard(std::shared_ptr<Board> newBoard);
 
 private:
     std::shared_ptr<Board> board;

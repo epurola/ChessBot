@@ -18,7 +18,6 @@ find_package(Qt6 REQUIRED COMPONENTS Core Widgets Concurrent)
 
 set(COMMON_SOURCES
     src/ChessBoardWidget.cpp
-    src/BitBoard.cpp
     src/Board.cpp
     src/AttackTable.cpp
     src/Evaluation.cpp
@@ -62,7 +61,6 @@ src/BitBoard.h
 src/Board.h
 src/AttackTable.h
 src/Evaluation.h
-src/BitBoard.cpp
 src/Board.cpp
 src/AttackTable.cpp
 src/Evaluation.cpp

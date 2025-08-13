@@ -126,7 +126,7 @@ void Uci::handleSetOption(const std::string &option)
  */
 void Uci::handleUciNewGame()
 {
-    board->resetBoard(); // Reset board
+    board = std::make_shared<Board>(); // Reset board
     std::cout << "New game started" << std::endl;
 }
 

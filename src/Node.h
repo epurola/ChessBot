@@ -33,11 +33,9 @@ public:
     Node()
         : from(-10), to(-1), score(0), gameOver(false)
     {
-        for (int i = 0; i < 7; ++i)
-        {
-            previousBestMoves[i] = {-1, -1};
-        }
-  
+       
+        std::fill(std::begin(previousBestMoves), std::end(previousBestMoves), Move{-1,-1});
+
     }
 
     /**
@@ -108,6 +106,8 @@ public:
 
     /** Stores killer moves (strong moves from previous searches) to improve move ordering. */
     std::unordered_map<int, Move> killerMoves;
+
+    
 
 };
 

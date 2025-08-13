@@ -13,7 +13,6 @@
  */
 Board::Board()
 {
-
     setFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
     enPassantTarget = 0;
     lastMoveEnPassant = false;
@@ -248,7 +247,7 @@ uint64_t Board::computeZobristHash()
 {
     uint64_t hash = 0;
 
-    for (int square = 0; square < 64; square++)
+    for (int square = 0; square < 64; ++square)
     {
         char piece = getPieceAtSquare(square);
         int pieceIndex = pieceToIndex(piece);
@@ -769,92 +768,86 @@ std::string Board::getFen()
  *
  * @note This function is called in mimimax and when using AI only the latest move applied is stored.
  */
-void Board::undoMove(int from, int to, char capturedPiece, uint64_t enpSquare,
-                     bool lastMoveEnPassant1, int enpassantCapturedSquare1,
-                     char enpassantCapturedPiece1, bool wasPromotion,
-                     char originalPawn, bool WhiteCastleKBefore,
-                     bool WhiteCastleQBefore, bool BlackCastleKBefore,
-                     bool BlackCastleQBefore,
-                     uint64_t hash, bool whiteTurn)
+void Board::undoMove(LastMove lastmove)
 {
 
-    if (gameFensHistory.find(hash) != gameFensHistory.end())
+    if (gameFensHistory.find(lastmove.hash) != gameFensHistory.end())
     {
-        gameFensHistory[hash]--;
-        if (gameFensHistory[hash] == 0)
+        gameFensHistory[lastmove.hash]--;
+        if (gameFensHistory[lastmove.hash] == 0)
         {
-            gameFensHistory.erase(hash);
+            gameFensHistory.erase(lastmove.hash);
         }
     }
 
-    whiteToMove = whiteTurn;
-    this->enPassantTarget = enpSquare;
+    whiteToMove = lastmove.whiteTurn;
+    this->enPassantTarget = lastmove.enpSquare;
 
-    char movedPiece = getPieceAtSquare(to);
+    char movedPiece = getPieceAtSquare(lastmove.to);
 
-    WhiteCanCastleK = WhiteCastleKBefore;
-    WhiteCanCastleQ = WhiteCastleQBefore;
-    blackCanCastleK = BlackCastleKBefore;
-    blackCanCastleQ = BlackCastleQBefore;
+    WhiteCanCastleK = lastmove.WhiteCastleKBefore;
+    WhiteCanCastleQ = lastmove.WhiteCastleQBefore;
+    blackCanCastleK = lastmove.BlackCastleKBefore;
+    blackCanCastleQ = lastmove.BlackCastleQBefore;
 
-    if (std::tolower(movedPiece) == 'k' && std::abs(from - to) == 2)
+    if (std::tolower(movedPiece) == 'k' && std::abs(lastmove.from - lastmove.to) == 2)
     {
         int rookFrom, rookTo;
 
-        if (to == 6)
+        if (lastmove.to == 6)
         {
             rookFrom = 5;
             rookTo = 7;
         }
-        else if (to == 2)
+        else if (lastmove.to == 2)
         {
             rookFrom = 3;
             rookTo = 0;
         }
-        else if (to == 62)
+        else if (lastmove.to == 62)
         {
             rookFrom = 61;
             rookTo = 63;
         }
-        else if (to == 58)
+        else if (lastmove.to == 58)
         {
             rookFrom = 59;
             rookTo = 56;
         }
 
-        updateBitboards(movedPiece, to, from);
+        updateBitboards(movedPiece, lastmove.to, lastmove.from);
 
         updateBitboards(getPieceAtSquare(rookFrom), rookFrom, rookTo);
     }
 
-    if (wasPromotion)
+    if (lastmove.wasPromotion)
     {
 
-        if (std::isupper(originalPawn))
+        if (std::isupper(lastmove.originalPawn))
         {
-            whiteQueens.clearSquare(to);
-            whitePawns.setSquare(from);
+            whiteQueens.clearSquare(lastmove.to);
+            whitePawns.setSquare(lastmove.from);
         }
         else
         {
-            blackQueens.clearSquare(to);
-            blackPawns.setSquare(from);
+            blackQueens.clearSquare(lastmove.to);
+            blackPawns.setSquare(lastmove.from);
         }
     }
     else
     {
-        char movedPiece_ = getPieceAtSquare(to);
-        updateBitboards(movedPiece_, to, from);
+        char movedPiece_ = getPieceAtSquare(lastmove.to);
+        updateBitboards(movedPiece_, lastmove.to, lastmove.from);
     }
 
-    if (capturedPiece != ' ')
+    if (lastmove.capturedPiece != ' ')
     {
-        restoreCapturedPiece(to, capturedPiece);
+        restoreCapturedPiece(lastmove.to, lastmove.capturedPiece);
     }
 
-    if (lastMoveEnPassant1)
+    if (lastmove.wasEnPassant)
     {
-        restoreCapturedPiece(enpassantCapturedSquare1, enpassantCapturedPiece1);
+        restoreCapturedPiece(lastmove.enPassantCapturedSquare, lastmove.enPassantCapturedPiece);
     }
 
     allPieces = getBlackPieces() | getWhitePieces();
@@ -941,7 +934,7 @@ void Board::restoreCapturedPiece(int square, char piece)
 bool Board::movePiece(int from, int to)
 {
 
-    // computeZobristHash();
+    //computeZobristHash();
     uint64_t hash = getZobristHash();
     gameFensHistory[hash]++;
 

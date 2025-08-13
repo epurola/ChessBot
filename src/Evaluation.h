@@ -92,7 +92,7 @@ private:
 
     // Material evaluation
     int evaluateMaterial();
-    int evaluatePieceSet(Bitboard &bitboard, int value);
+    inline int evaluatePieceSet(Bitboard &bitboard, int value);
     bool isPassedPawn(int square, bool isWhite);
     int evaluatePassedPawns();
     int rookOnOpenFile();

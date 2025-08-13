@@ -4,6 +4,9 @@
 
 constexpr int NEG_INF = std::numeric_limits<int>::min();
 constexpr int POS_INF = std::numeric_limits<int>::max();
+constexpr Move NULL_MOVE{-1, -1};
+constexpr Move RESIGN_MOVE{-4, -1};
+constexpr Move STALEMATE_MOVE{-2, -1};
 
 /**
  * @brief Implements Iterative Deepening Depth-First Search (IDDFS).
@@ -70,21 +73,16 @@ std::pair<int, Move> Node::minimax(Board &board, int depth, bool maximizingPlaye
     if (depth == 0)
     {
         int eval = evaluate.evaluatePosition();
-        return {eval, {-4, -1}};
+        return {eval, {NULL_MOVE}};
     }
 
     if (board.isThreefoldRepetition())
     {
         if (maximizingPlayer)
-        {
-            return {alpha >= 0 ? -30 : 0, {-11, -1}};
-        }
+            return {alpha >= 0 ? -30 : 0, NULL_MOVE};
         else
-        {
-            return {beta <= 0 ? 30 : 0, {-11, -1}};
-        }
+            return {beta <= 0 ? 30 : 0, NULL_MOVE};
     }
-    
 
     board.moveCount = 0;
 
@@ -99,7 +97,7 @@ std::pair<int, Move> Node::minimax(Board &board, int depth, bool maximizingPlaye
         int transpositionEval = entry.evaluation;
         if (depth <= entry.depth)
         {
-            if (entry.flag == TTFlag::EXACT)
+            if (entry.flag == TTFlag::EXACT) [[likely]]
             {
                 return {entry.evaluation, {entry.bestFrom, entry.bestTo}};
             }
@@ -114,8 +112,7 @@ std::pair<int, Move> Node::minimax(Board &board, int depth, bool maximizingPlaye
         }
     }
 
-    constexpr int MAX_MOVES = 256;
-    Move moves[MAX_MOVES];
+    Move moves[256];
     Move moveData = board.getAllLegalMovesAsArray(moves, maximizingPlayer);
     int moveCount = moveData.from;
     int nonCaptureStart = moveData.to;
@@ -128,86 +125,73 @@ std::pair<int, Move> Node::minimax(Board &board, int depth, bool maximizingPlaye
         if (board.isKingInCheck(maximizingPlayer)) [[unlikely]]
         {
             int eval = maximizingPlayer ? NEG_INF : POS_INF;
-            return {eval, {-3, -1}};
+            return {eval, NULL_MOVE};
         }
         else [[likely]]
         {
-            return {0, {-2, -1}};
+            return {0, NULL_MOVE};
         }
     }
 
     int curr = 0;
     for (int j = 0; j < moveCount; ++j)
     {
-        // Check if moves[j] is in previousBestMoves
-        for (int i = 0; i < 7; ++i)
+        if (std::find(std::begin(previousBestMoves),
+                      std::end(previousBestMoves), moves[j]) != std::end(previousBestMoves))
         {
-            if (moves[j] == previousBestMoves[i])
-            {
-                std::swap(moves[curr], moves[j]);
-                curr++;
-                break; 
-            }
+            std::swap(moves[curr++], moves[j]);
         }
     }
 
-     if (killerMoves[depth] != Move{-1, -1})
+    if (killerMoves[depth] != NULL_MOVE)
     {
         Move killerMove = killerMoves[depth];
 
-        for (int i = 0; i < moveCount; ++i)
+        auto it = std::find(moves, moves + moveCount, killerMove);
+        if (it != moves + moveCount)
         {
-            if (moves[i] == killerMove)
-            {
-                std::swap(moves[0], moves[i]);
-                break;
-            }
+            std::swap(moves[0], *it);
         }
     }
-
 
     int bestScore = maximizingPlayer ? NEG_INF : POS_INF;
     Move bestMove = {moves[0].from, moves[0].to};
 
     for (int i = 0; i < moveCount; ++i)
     {
-
         int moveFrom = moves[i].from;
         int moveTo = moves[i].to;
 
-        board.movePiece(moveFrom, moveTo);  // Make this return last move
+        board.movePiece(moveFrom, moveTo); // Make this return last move
         lastMove = board.getLastMove();
 
-         int newDepth = depth - 1;
+        int newDepth = depth - 1;
         int childScore;
 
-    if (depth >= 3 && i >= 5 )
-    {
-        // Reduced depth search
-        int reducedDepth = newDepth - 1;  
-        childScore = minimax(board, reducedDepth, !maximizingPlayer, alpha, beta, evaluate).first;
-
-        if (maximizingPlayer && childScore > alpha && childScore < beta)
+        if (depth >= 6 && i >= 7)
         {
+            // Reduced depth search
+            int reducedDepth = newDepth - 1;
+            childScore = minimax(board, reducedDepth, !maximizingPlayer, alpha, beta, evaluate).first;
+
+            if (maximizingPlayer && childScore > alpha && childScore < beta)
+            {
+                childScore = minimax(board, newDepth, !maximizingPlayer, alpha, beta, evaluate).first;
+            }
+            else if (!maximizingPlayer && childScore < beta && childScore > alpha)
+            {
+                childScore = minimax(board, newDepth, !maximizingPlayer, alpha, beta, evaluate).first;
+            }
+        }
+        else
+        {
+            // Normal full depth search
             childScore = minimax(board, newDepth, !maximizingPlayer, alpha, beta, evaluate).first;
         }
-        else if (!maximizingPlayer && childScore < beta && childScore > alpha)
-        {
-            childScore = minimax(board, newDepth, !maximizingPlayer, alpha, beta, evaluate).first;
-        }
-    }
-    else
-    {
-        // Normal full depth search
-        childScore = minimax(board, newDepth, !maximizingPlayer, alpha, beta, evaluate).first;
-    }
 
-        nodesExplored++;
+        // nodesExplored++;
 
-        board.undoMove(lastMove.from, lastMove.to, lastMove.capturedPiece, lastMove.enpSquare, lastMove.wasEnPassant,
-                       lastMove.enPassantCapturedSquare, lastMove.enPassantCapturedPiece,
-                       lastMove.wasPromotion, lastMove.originalPawn, lastMove.WhiteCastleKBefore,
-                       lastMove.WhiteCastleQBefore, lastMove.BlackCastleKBefore, lastMove.BlackCastleQBefore, lastMove.hash, lastMove.whiteTurn);
+        board.undoMove(lastMove);
 
         if (maximizingPlayer)
         {
@@ -233,41 +217,26 @@ std::pair<int, Move> Node::minimax(Board &board, int depth, bool maximizingPlaye
             break; //  Alpha-Beta Pruning
     }
 
-    if (bestMove.from != -1 || bestMove.to != -1)
+    if (bestMove != NULL_MOVE) [[likely]]
     {
         // Check if bestMove is already in the previousBestMoves array
-        bool found = false;
-        for (int i = 0; i < 7; ++i)
+        if (std::find(std::begin(previousBestMoves),
+                      std::end(previousBestMoves),
+                      bestMove) == std::end(previousBestMoves))
         {
-            if (previousBestMoves[i] == bestMove)
-            {
-                found = true;
-                break; // No need to add again, just exit the loop
-            }
-        }
-
-        if (!found) // Only add if it was not found
-        {
-            // Shift all moves down by one (to make space for the new move at the front)
-            for (int i = 6; i > 0; --i)
-            {
-                previousBestMoves[i] = previousBestMoves[i - 1];
-            }
-            // Insert the new bestMove at the front (index 0)
+            std::move_backward(std::begin(previousBestMoves),
+                               std::end(previousBestMoves) - 1,
+                               std::end(previousBestMoves));
             previousBestMoves[0] = bestMove;
         }
-    }
-
-    if (bestMove.from != -1)
-    {
         killerMoves[depth] = bestMove;
+    }else [[unlikely]]
+    {
+        bestMove = moves[0];
+        std::cout << "Null move returned" << std::endl;
     }
 
     board.storeTransposition(positionHash, depth, bestScore, alpha, beta, bestMove.from, bestMove.to);
-
-    if(bestMove.from < 0 || bestMove.to < 0){
-        bestMove = {moves[0]};
-    }
 
     return {bestScore, bestMove};
 }
